@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { View, StyleSheet } from "react-native";
 import {Text, Input, Button} from "react-native-elements";
+import { Context as AuthContext } from '../context/AuthContext';
 
 const SigninScreen = ({ navigation }) => {
+    const { state, signin } = useContext(AuthContext);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
@@ -14,7 +16,6 @@ const SigninScreen = ({ navigation }) => {
                 value={email} 
                 onChangeText={setEmail}
                 autoCorrect={false}
-                autoCapitalize={false} 
             />
             <Input 
                 secureTextEntry
@@ -22,11 +23,10 @@ const SigninScreen = ({ navigation }) => {
                 value={password} 
                 onChangeText={setPassword} 
                 autoCorrect={false}
-                autoCapitalize={false}
             />
             <Button 
                 title="Sign In"
-                onPress={() => navigation.navigate("ScheduleList")}
+                onPress={() => signin({ email, password })}
             />
         </View>
     )
