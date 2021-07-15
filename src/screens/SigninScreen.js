@@ -10,7 +10,7 @@ const SigninScreen = ({ navigation }) => {
 
     return (
         <View style={styles.screen}>
-            <Text h3>Sign In BAF</Text>
+            <Text style={{...styles.mb30, textAlign: "center" }} h3>Sign In BAF</Text>
             <Input 
                 label="Email" 
                 value={email} 
@@ -24,7 +24,13 @@ const SigninScreen = ({ navigation }) => {
                 onChangeText={setPassword} 
                 autoCorrect={false}
             />
+            {state.errorMessage ?
+                <Text style={styles.errorMessage}>*{state.errorMessage}</Text>
+                :
+                null
+            }
             <Button 
+                buttonStyle={styles.buttons}
                 title="Sign In"
                 onPress={() => signin({ email, password })}
             />
@@ -42,8 +48,21 @@ const styles = StyleSheet.create({
     screen: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center',
+        marginHorizontal: 10,
         marginBottom: 100
+    },
+    mb30: {
+        marginBottom: 30
+    },
+    buttons: {
+        width: "96%",
+        alignSelf: "center"
+    },
+    errorMessage: {
+        fontSize: 14,
+        color: 'red',
+        marginBottom: 10,
+        paddingHorizontal: 10
     }
 });
 

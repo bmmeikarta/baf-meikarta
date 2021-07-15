@@ -1,14 +1,24 @@
 import React from "react";
-import { Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Button } from "react-native";
 
-const HomeScreen = () => {
-  return <Text style={styles.text}>HomeScreen</Text>;
+const HomeScreen = ({ navigation }) => {
+    return (
+        <View style={styles.screen}>
+            <Text>Home Screen !</Text>
+            <Button 
+                title="Go to Schedule" 
+                onPress={()=> navigation.navigate('ScheduleList')} 
+            />
+        </View>
+    )
 };
 
 const styles = StyleSheet.create({
-  text: {
-    fontSize: 30
-  }
+    screen: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center'
+    }
 });
 
 export default HomeScreen;
