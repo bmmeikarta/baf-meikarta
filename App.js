@@ -4,6 +4,7 @@ import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 import { Provider as AuthProvider } from './src/context/AuthContext';  
 import { setNavigator } from './src/navigationRef';
+import { Ionicons } from '@expo/vector-icons';
 
 import HomeScreen from "./src/screens/HomeScreen";
 import ScheduleListScreen from "./src/screens/ScheduleListScreen";
@@ -19,13 +20,37 @@ const switchNavigator = createSwitchNavigator({
     Signin: SigninScreen
   }),
   mainFlow: createBottomTabNavigator({
-    Home: HomeScreen,
-    scheduleFlow: createStackNavigator({
-      ScheduleList: ScheduleListScreen,
-      ScheduleDetail: ScheduleDetailScreen,
-      Resolve: ResolveScreen
-    }),
-    Account: AccountScreen 
+    Home: { 
+      screen: HomeScreen,
+      navigationOptions: {
+        tabBarLabel: ()=>null,
+        tabBarIcon: (tabInfo) => {
+          return <Ionicons name="ios-home" size={28} color={tabInfo.tintColor}></Ionicons>
+        }
+      }
+    },
+    scheduleFlow: { 
+        screen: createStackNavigator({
+          ScheduleList: ScheduleListScreen,
+          ScheduleDetail: ScheduleDetailScreen,
+          Resolve: ResolveScreen
+        }),
+        navigationOptions: {
+          tabBarLabel: ()=>null,
+          tabBarIcon: (tabInfo) => {
+            return <Ionicons name="ios-time" size={30} color={tabInfo.tintColor}></Ionicons>
+          }
+        }
+      },
+    Account: { 
+      screen: AccountScreen,
+      navigationOptions: {
+        tabBarLabel: ()=>null,
+        tabBarIcon: (tabInfo) => {
+          return <Ionicons name="ios-person" size={30} color={tabInfo.tintColor}></Ionicons>
+        }
+      }
+    } 
   })
 });
 
