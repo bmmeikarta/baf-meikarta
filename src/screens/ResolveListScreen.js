@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
-const ResolveScreen = props => {
+const ResolveListScreen = props => {
     return (
         <View style={styles.screen}>
             <Text>Resolve Screen !</Text>
@@ -17,4 +17,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default ResolveScreen;
+export default ResolveListScreen;
