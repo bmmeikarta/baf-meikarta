@@ -2,7 +2,8 @@ import React from 'react';
 import { createAppContainer, createSwitchNavigator } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
-import { Provider as AuthProvider } from './src/context/AuthContext';  
+import { Provider as AuthProvider } from './src/context/AuthContext'; 
+import { Provider as ScheduleProvider } from './src/context/ScheduleContext';
 import { setNavigator } from './src/navigationRef';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -56,7 +57,7 @@ const switchNavigator = createSwitchNavigator({
       navigationOptions: {
         tabBarLabel: ()=>null,
         tabBarIcon: (tabInfo) => {
-          return <Ionicons name="ios-pie-chart-outline" size={30} color={tabInfo.tintColor}></Ionicons>
+          return <Ionicons name="ios-document-attach-outline" size={30} color={tabInfo.tintColor}></Ionicons>
         }
       }
     },
@@ -88,9 +89,13 @@ const switchNavigator = createSwitchNavigator({
 const App = createAppContainer(switchNavigator);
 
 export default () => {
-  return <AuthProvider>
-    <App 
-      ref={(navigator) => { setNavigator(navigator) }} 
-    />
-  </AuthProvider>
+  return (
+    <ScheduleProvider>
+      <AuthProvider>
+        <App 
+          ref={(navigator) => { setNavigator(navigator) }} 
+        />
+      </AuthProvider>
+    </ScheduleProvider>
+  )
 }

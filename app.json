@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "rn-starter-1",
-    "slug": "rn-starter-1",
+    "name": "baf-meikarta",
+    "slug": "baf-meikarta",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/adaptive-icon_meikarta.png",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/splash_meikarta.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -21,9 +21,10 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/adaptive-icon_meikarta.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.bafmeikarta.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"

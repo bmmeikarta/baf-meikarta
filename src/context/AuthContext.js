@@ -36,6 +36,7 @@ const clearError = (dispatch) => () => {
 const signin = (dispatch) => async ({ email, password }, callback) => {
     try {
         clearError();
+        email = email.toLowerCase();
         const response = await easymoveinApi.post('/login.php', { email, password });
         if(!response.data.status) throw new Error(response.data.message);
 
