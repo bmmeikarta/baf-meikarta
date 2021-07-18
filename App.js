@@ -90,12 +90,12 @@ const App = createAppContainer(switchNavigator);
 
 export default () => {
   return (
-    <ScheduleProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <ScheduleProvider>
         <App 
           ref={(navigator) => { setNavigator(navigator) }} 
         />
-      </AuthProvider>
-    </ScheduleProvider>
+      </ScheduleProvider>
+    </AuthProvider>
   )
 }

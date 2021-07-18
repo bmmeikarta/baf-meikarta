@@ -5,6 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
 import { navigate } from "../navigationRef";
 import moment from "moment";
+import jwtDecode from "jwt-decode";
 
 const scheduleReducer = (state, action) => {
     switch (action.type) {
@@ -51,11 +52,19 @@ const fetchSchedule = dispatch => async () => {
     }
 };
 
-const getCurrentShift = dispatch => (x) => {
+const getCurrentShift = dispatch => async (x) => {
+    const token = await AsyncStorage.getItem('token');
+    const userDetail = jwtDecode(token);
+    
     const job = 'CSO'; // TODO: get from profile
-    const shift = 2; // TODO: get from profile
+    let shift = userDetail.data.shift;
     const hourNow = moment().format('H');
 
+    if(!shift){
+        if(hourNow >= 7 && hourNow < 15) shift = 1;
+        if(hourNow >= 15 && hourNow < 23) shift = 2;
+        if(hourNow >= 23 || hourNow < 7) shift = 3;
+    }
     const mapWorkHour = [
         {
             job: 'CSO',
@@ -82,11 +91,14 @@ const getCurrentShift = dispatch => (x) => {
     // check user shift
     const currentJob = mapWorkHour.find(v => v.job == job) || {};
     const currentShift = (currentJob.work_hour || [])
-                            .find(v => 
-                                v.shift == shift && 
-                                hourNow >= v.start &&  
-                                hourNow < v.end 
-                            ) || {};
+                            .find(v => {
+                                // To return shift 3
+                                if(v.end < v.start){
+                                    return v.shift == shift && (hourNow >= v.start || hourNow < v.end)
+                                }
+
+                                return v.shift == shift && (hourNow >= v.start && hourNow < v.end)
+                            }) || {};
     dispatch({ type: 'SCHEDULE_CURRENT_SHIFT', payload: currentShift });
 }
 

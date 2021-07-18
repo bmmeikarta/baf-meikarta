@@ -57,7 +57,12 @@ const getStatusFloor = (currentShift, schedulePattern, blocks, idx) => {
     // untuk dapat jam ke berapa dr shift tsb, 
     // e.g. jam ke 1 dari shift
     const hourNow = moment().format('H');
-    const jamKe = (hourNow - currentShift.start) + 1;
+    let jamKe = (hourNow - currentShift.start) + 1;
+
+    // to handle shift 3
+    if(currentShift.end < currentShift.start && hourNow < currentShift.start){
+        jamKe = parseInt(hourNow) + 1;
+    }
 
     const activeBlock = schedulePattern.find(v => v.block == blocks) || {};
     const blockPattern = activeBlock.patterns || [];
@@ -116,7 +121,7 @@ const Timer = ({getCurrentShift}) => {
             const timeTo = moment('1995-11-17 ' + hourTo);
 
             const hourDiff = moment(timeTo.diff(timeNow)).format('mm:ss');
-            if(hourDiff == '59:58') getCurrentShift();
+            if(hourDiff == '59:59') getCurrentShift();
             setTimeLeft(hourDiff);
         }, 1000);
 
