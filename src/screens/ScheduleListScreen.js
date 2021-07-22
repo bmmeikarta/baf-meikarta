@@ -88,11 +88,13 @@ const RenderRow = ({ floor, statusFloor }) => {
     let bgZone = '#000';
 
     if(statusFloor == 'inactive'){
-        bgFloor = '#85a687'; 
-        bgZone = '#85a687';
-    }else if(statusFloor == 'active'){
+        // bgFloor = '#85a687'; 
+        // bgZone = '#85a687';
         bgFloor = '#19d425'; 
         bgZone = '#19d425';
+    }else if(statusFloor == 'active'){
+        bgFloor = '#6598eb'; 
+        bgZone = '#6598eb';
     } 
         
 
