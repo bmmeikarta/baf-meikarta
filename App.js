@@ -16,6 +16,14 @@ import ResolveListScreen from "./src/screens/ResolveListScreen";
 import AccountScreen from "./src/screens/AccountScreen";
 import SigninScreen from "./src/screens/SigninScreen";
 import ResolveAuthScreen from './src/screens/ResolveAuthScreen';
+import { StyleSheet, Text } from 'react-native';
+
+const styles = StyleSheet.create({
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold'
+  }
+});
 
 const switchNavigator = createSwitchNavigator({
   ResolveAuth: ResolveAuthScreen,
@@ -38,8 +46,18 @@ const switchNavigator = createSwitchNavigator({
     // TAB SCHEDULE
     scheduleFlow: { 
       screen: createStackNavigator({
-        ScheduleList: ScheduleListScreen,
-        ScheduleDetail: ScheduleDetailScreen,
+        ScheduleList: {
+          screen: ScheduleListScreen,
+          navigationOptions: {
+            headerTitle: ()=><Text style={styles.headerTitle}>{'Schedule'}</Text>,
+          }
+        },
+        ScheduleReportDetail: {
+          screen: ReportDetailScreen,
+          navigationOptions: {
+            headerTitle: ()=><Text style={styles.headerTitle}>{'Complaint Detail'}</Text>,
+          }
+        },
       }),
       navigationOptions: {
         tabBarLabel: ()=>null,
@@ -51,8 +69,18 @@ const switchNavigator = createSwitchNavigator({
     // TAB REPORT
     reportFlow: {
       screen: createStackNavigator({
-        ReportList: ReportListScreen,
-        ReportDetail: ReportDetailScreen,
+        ReportList: {
+          screen: ReportListScreen,
+          navigationOptions: {
+            headerTitle: ()=><Text style={styles.headerTitle}>{'Complaint'}</Text>,
+          }
+        },
+        ReportDetail: {
+          screen: ReportDetailScreen,
+          navigationOptions: {
+            headerTitle: ()=><Text style={styles.headerTitle}>{'Complaint Detail'}</Text>,
+          }
+        },
       }),
       navigationOptions: {
         tabBarLabel: ()=>null,

@@ -1,4 +1,3 @@
-const path = require('path');
 const pak = require('./package.json');
 
 module.exports = function(api) {
@@ -10,12 +9,9 @@ module.exports = function(api) {
         'module-resolver',
         {
           extensions: ['.tsx', '.ts', '.js', '.json'],
-          alias: {
-            [pak.name]: path.join(__dirname, '..', pak.source),
-          },
-        },
+        }
       ],
-      'react-native-reanimated/plugin'
+      'react-native-reanimated/plugin' // PUT IT HERE
     ]
   };
 };

@@ -10,9 +10,12 @@ import Animated, {
   withTiming,
   runOnUI,
 } from "react-native-reanimated";
+import { Ionicons } from '@expo/vector-icons';
 
 import Chevron from "./Chevron";
 import Item, { ListItem } from "./ListItem";
+import Checkmark from "./Checkmark";
+import ListChildItem from "./ListChildItem";
 
 const styles = StyleSheet.create({
   container: {
@@ -25,6 +28,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
+  groupBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   title: {
     fontSize: 16,
     fontWeight: "bold",
@@ -32,6 +40,20 @@ const styles = StyleSheet.create({
   items: {
     overflow: "hidden",
   },
+  checkmarkContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: '#525251',
+    height: 30,
+    width: 30,
+    borderRadius: 30 / 2,
+    marginRight: 30
+  },
+  checkmark: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center'
+  }
 });
 
 export interface List {
@@ -43,39 +65,67 @@ interface ListProps {
   list: List;
 }
 
-const List = ({ list }: ListProps) => {
+const List = ({ list }) => {
   const aref = useAnimatedRef<View>();
+  const arefChild = useAnimatedRef<View>();
   const open = useSharedValue(false);
-  const progress = useDerivedValue(() =>
+  const checkmark = useSharedValue(false);
+
+  const progress = useDerivedValue(() => 
     open.value ? withSpring(1) : withTiming(0)
   );
+  const checkmarkProgress = useDerivedValue(() => 
+    checkmark.value ? withSpring(1) : withTiming(0)
+  );
+
   const height = useSharedValue(0);
   const headerStyle = useAnimatedStyle(() => ({
     borderBottomLeftRadius: progress.value === 0 ? 8 : 0,
     borderBottomRightRadius: progress.value === 0 ? 8 : 0,
   }));
   const style = useAnimatedStyle(() => ({
-    height: height.value * progress.value + 1,
-    opacity: progress.value === 0 ? 0 : 1,
+    // minHeight: height.value * progress.value + 1,
+    // height: progress.value === 0 ? 0 : '100%',
+    display: progress.value === 0 ? 'none':'flex',
+    // opacity: progress.value === 0 ? 0 : 1,
   }));
   return (
     <>
-      <TouchableWithoutFeedback
-        onPress={() => {
-          if (height.value === 0) {
-            runOnUI(() => {
-              "worklet";
-              height.value = measure(aref).height;
-            })();
-          }
-          open.value = !open.value;
-        }}
-      >
         <Animated.View style={[styles.container, headerStyle]}>
-          <Text style={styles.title}>Total Points</Text>
-          <Chevron {...{ progress }} />
+          <Text style={styles.title}>{list.title}</Text>
+          <View style={styles.groupBtn}>
+            {/* <View style={styles.checkmarkContainer}>
+              <Ionicons name="ios-checkmark" size={20} style={styles.checkmark} ></Ionicons>
+            </View> */}
+            <TouchableWithoutFeedback
+              onPress={() => {
+                checkmark.value = !checkmark.value;
+                open.value = false;
+              }}
+            >
+              <Animated.View style={{marginRight: 30}}>
+                <Checkmark {...{ checkmarkProgress }} size={20}/>
+              </Animated.View>
+            </TouchableWithoutFeedback>
+
+            <TouchableWithoutFeedback
+              onPress={() => {
+                if (height.value === 0) {
+                  runOnUI(() => {
+                    "worklet";
+                    height.value = measure(aref).height;
+                  })();
+                }
+                open.value = !open.value;
+                checkmark.value = false;
+              }}
+            >
+              <Animated.View>
+                <Chevron {...{ progress }} />
+              </Animated.View>
+            </TouchableWithoutFeedback>
+          </View>
         </Animated.View>
-      </TouchableWithoutFeedback>
       <Animated.View style={[styles.items, style]}>
         <View
           ref={aref}
@@ -83,13 +133,13 @@ const List = ({ list }: ListProps) => {
             nativeEvent: {
               layout: { height: h },
             },
-          }) => console.log({ h })}
+          }) => console.log('')}
         >
-          {list.items.map((item, key) => (
+          {list.questions.map((question, key) => (
             <Item
               key={key}
-              isLast={key === list.items.length - 1}
-              {...{ item }}
+              isLast={key === list.questions.length - 1}
+              {...{ question }}
             />
           ))}
         </View>

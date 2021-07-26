@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
-import { View, Text, StyleSheet, Button, ScrollView, SafeAreaView } from "react-native";
+import { View, Text, StyleSheet, Button, ScrollView, SafeAreaView, TouchableOpacity } from "react-native";
 import moment from 'moment';
 import { NavigationEvents } from "react-navigation";
 import { Context as ScheduleContext } from '../context/ScheduleContext';
 import { navigate } from "../navigationRef";
 
-const ScheduleListScreen = ({ navigation }) => {
+const ScheduleListScreen = ({ navigation, showActiveOnly, parentComponent }) => {
     const { state, fetchSchedule, fetchSchedulePattern, getCurrentShift } = useContext(ScheduleContext);
     const { master_unit, currentShift, schedulePattern } = state;
 
@@ -26,28 +26,38 @@ const ScheduleListScreen = ({ navigation }) => {
             fetchSchedule();
             getCurrentShift();
         }} />
-            <ScrollView style={styles.screen}>
-                <Timer getCurrentShift={getCurrentShift}/>
-                { dataUnit.length > 0 &&
-                    <Text style={styles.textBlockName}>{dataUnit[0].block_name}</Text>
+        <ScrollView style={styles.screen}>
+            <Timer getCurrentShift={getCurrentShift}/>
+            { dataUnit.length > 0 &&
+                <Text style={styles.textBlockName}>{dataUnit[0].block_name}</Text>
+            }
+            <View style={styles.header}>
+                <View style={[styles.items, { backgroundColor: 'orange' }]}><Text style={styles.textStyle}>1B</Text></View>
+                <View style={[styles.items, { backgroundColor: '#ff9cf5' }]}><Text style={styles.textStyle}>Zone 1</Text></View>
+                <View style={[styles.items, { backgroundColor: '#ff9cf5' }]}><Text style={styles.textStyle}>Zone 2</Text></View>
+                <View style={[styles.items, { backgroundColor: '#ff9cf5' }]}><Text style={styles.textStyle}>Zone 3</Text></View>
+                <View style={[styles.items, { backgroundColor: '#ff9cf5' }]}><Text style={styles.textStyle}>Zone 4</Text></View>
+            </View>
+            <View style={{ paddingBottom: 20 }}>
+                {
+                    (dataUnit || []).map((datum, idx) => { // This will render a row for each data element.
+                        const statusFloor = getStatusFloor(currentShift, schedulePattern, datum.blocks, idx);
+                        const floorName = datum.block_name + ' - ' + datum.floor;
+
+                        if(showActiveOnly && statusFloor != 'active') return false;
+                        return <RenderRow 
+                                    navigation={navigation} 
+                                    floorName={floorName} 
+                                    key={datum.floor} 
+                                    floor={datum.floor} 
+                                    statusFloor={statusFloor}
+                                    parentComponent={parentComponent}
+                                />;
+                    })
                 }
-                <View style={styles.header}>
-                    <View style={[styles.items, { backgroundColor: 'orange' }]}><Text style={styles.textStyle}>1B</Text></View>
-                    <View style={[styles.items, { backgroundColor: '#ff9cf5' }]}><Text style={styles.textStyle}>Zone 1</Text></View>
-                    <View style={[styles.items, { backgroundColor: '#ff9cf5' }]}><Text style={styles.textStyle}>Zone 2</Text></View>
-                    <View style={[styles.items, { backgroundColor: '#ff9cf5' }]}><Text style={styles.textStyle}>Zone 3</Text></View>
-                    <View style={[styles.items, { backgroundColor: '#ff9cf5' }]}><Text style={styles.textStyle}>Zone 4</Text></View>
-                </View>
-                <View style={{ paddingBottom: 20 }}>
-                    {
-                        (dataUnit || []).map((datum, idx) => { // This will render a row for each data element.
-                            const statusFloor = getStatusFloor(currentShift, schedulePattern, datum.blocks, idx);
-                            return <RenderRow key={datum.floor} floor={datum.floor} statusFloor={statusFloor} />;
-                        })
-                    }
-                </View>
-                
-            </ScrollView>
+            </View>
+            
+        </ScrollView>
     </>
     )
 };
@@ -83,7 +93,7 @@ const getStatusFloor = (currentShift, schedulePattern, blocks, idx) => {
 
 };
 
-const RenderRow = ({ floor, statusFloor }) => {
+const RenderRow = ({ navigation, floor, floorName, statusFloor, parentComponent }) => {
     let bgFloor = '#ff9cf5';
     let bgZone = '#000';
 
@@ -95,16 +105,24 @@ const RenderRow = ({ floor, statusFloor }) => {
     }else if(statusFloor == 'active'){
         bgFloor = '#6598eb'; 
         bgZone = '#6598eb';
-    } 
-        
+    }
+
+    let routeDetail;
+    switch(parentComponent) {
+        case 'ReportList':
+            routeDetail = 'ReportDetail';
+            break;
+        default:
+            routeDetail = 'ScheduleReportDetail';
+    };
 
     return (
         <View style={styles.trow}>
             <View style={[styles.items, { backgroundColor: `${bgFloor}` }]}><Text style={styles.textStyle}>{floor}</Text></View>
-            <View style={[styles.items, { backgroundColor: `${bgZone}` }]}></View>
-            <View style={[styles.items, { backgroundColor: `${bgZone}` }]}></View>
-            <View style={[styles.items, { backgroundColor: `${bgZone}` }]}></View>
-            <View style={[styles.items, { backgroundColor: `${bgZone}` }]}></View>
+            <TouchableOpacity onPress={()=> navigation.navigate(routeDetail, { headerTitle: `${floorName} - Zone 1` })} style={[styles.items, { backgroundColor: `${bgZone}` }]}></TouchableOpacity >
+            <TouchableOpacity onPress={()=> navigation.navigate(routeDetail, { headerTitle: `${floorName} - Zone 2` })} style={[styles.items, { backgroundColor: `${bgZone}` }]}></TouchableOpacity>
+            <TouchableOpacity onPress={()=> navigation.navigate(routeDetail, { headerTitle: `${floorName} - Zone 3` })} style={[styles.items, { backgroundColor: `${bgZone}` }]}></TouchableOpacity>
+            <TouchableOpacity onPress={()=> navigation.navigate(routeDetail, { headerTitle: `${floorName} - Zone 4` })} style={[styles.items, { backgroundColor: `${bgZone}` }]}></TouchableOpacity>
         </View>
     );
 }

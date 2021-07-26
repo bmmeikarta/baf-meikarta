@@ -1,12 +1,24 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, TouchableWithoutFeedback } from "react-native";
+import Animated, {
+  useAnimatedRef,
+  measure,
+  useSharedValue,
+  useAnimatedStyle,
+  useDerivedValue,
+  withSpring,
+  withTiming,
+  runOnUI,
+} from "react-native-reanimated";
+import Checkmark from "./Checkmark";
+import ListChildItem from "./ListChildItem";
 
 const LIST_ITEM_HEIGHT = 54;
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "white",
+    backgroundColor: "#ffd6d6",
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     alignItems: "center",
     paddingVertical: 8,
     paddingHorizontal: 16,
@@ -26,6 +38,9 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
   },
+  items: {
+    overflow: "hidden",
+  },
 });
 
 export interface ListItem {
@@ -38,10 +53,26 @@ interface ListItemProps {
   isLast: boolean;
 }
 
-const ListItem = ({ item, isLast }: ListItemProps) => {
+const ListItem = ({ question, isLast }) => {
+  const aref = useAnimatedRef<View>();
   const bottomRadius = isLast ? 8 : 0;
-  return (
-    <View
+  const checkmark = useSharedValue(false);
+  const checkmarkProgress = useDerivedValue(() => 
+    checkmark.value ? withSpring(1) : withTiming(0)
+  );
+
+  const height = useSharedValue(0);
+  const headerStyle = useAnimatedStyle(() => ({
+    borderBottomLeftRadius: checkmarkProgress.value === 0 ? 8 : 0,
+    borderBottomRightRadius: checkmarkProgress.value === 0 ? 8 : 0,
+  }));
+  const style = useAnimatedStyle(() => ({
+    height: height.value * checkmarkProgress.value + 1,
+    opacity: checkmarkProgress.value === 0 ? 0 : 1,
+  }));
+
+  return (<>
+    <Animated.View
       style={[
         styles.container,
         {
@@ -50,12 +81,42 @@ const ListItem = ({ item, isLast }: ListItemProps) => {
         },
       ]}
     >
-      <Text style={styles.name}>{item.name}</Text>
-      <View style={styles.pointsContainer}>
-        <Text style={styles.points}>{item.points}</Text>
+      <TouchableWithoutFeedback
+        onPress={() => {
+          if (height.value === 0) {
+            runOnUI(() => {
+              "worklet";
+              height.value = measure(aref).height;
+            })();
+          }
+          checkmark.value = !checkmark.value;
+        }}
+      >
+        <Animated.View style={{marginRight: 30}}>
+          <Checkmark {...{ checkmarkProgress }} size={15}/>
+        </Animated.View>
+      </TouchableWithoutFeedback>
+      <Text style={styles.name}>{question.label}</Text>
+    </Animated.View>
+    <Animated.View style={[styles.items, style]}>
+      <View
+        ref={aref}
+        onLayout={({
+            nativeEvent: {
+            layout: { height: h },
+            },
+        }) => console.log()}
+      >
+      {(question.items || []).map((item, key) => (
+          <ListChildItem
+            key={key}
+            isLast={key === question.items.length - 1}
+            {...{ item }}
+          />
+      ))}
       </View>
-    </View>
-  );
+    </Animated.View>
+  </>);
 };
 
 export default ListItem;

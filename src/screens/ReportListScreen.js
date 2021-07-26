@@ -1,20 +1,17 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { StyleSheet, Text, View, ScrollView } from "react-native";
+import ScheduleListScreen from "./ScheduleListScreen";
 
-const ReportScreen = props => {
-    return (
-        <View style={styles.screen}>
-            <Text>Report Screen !</Text>
-        </View>
-    )
+const ReportListScreen = ({ navigation }) => {
+  return (
+    <>
+      <ScheduleListScreen 
+        navigation={navigation} 
+        parentComponent={'ReportList'} 
+        showActiveOnly={true} 
+      />
+    </>
+  );
 };
 
-const styles = StyleSheet.create({
-    screen: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
-    }
-});
-
-export default ReportScreen;
+export default ReportListScreen;

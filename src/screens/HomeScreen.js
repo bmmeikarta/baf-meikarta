@@ -15,7 +15,7 @@ const HomeScreen = ({ navigation }) => {
                 <View style={styles.container}>
                     <Button 
                         buttonStyle={[styles.buttonChild, { backgroundColor: '#eb8015' }]}
-                        title="REPORT" 
+                        title="COMPLAINT" 
                         onPress={()=> navigation.navigate('ReportList')} 
                     />
                 </View>

@@ -15,6 +15,8 @@ const scheduleReducer = (state, action) => {
             return { ...state, ...action.payload };
         case 'SCHEDULE_CURRENT_SHIFT':
             return { ...state, currentShift: action.payload };
+        case 'SCHEDULE_ACTIVE_FLOOR':
+            return { ...state, activeFloor: action.payload };
         default:
             return state;
     }
@@ -102,10 +104,31 @@ const getCurrentShift = dispatch => async (x) => {
     dispatch({ type: 'SCHEDULE_CURRENT_SHIFT', payload: currentShift });
 }
 
+const getActiveFloor = dispatch => (blocks) => {
+    const { currentShift, schedulePattern } = dispatch({});
+
+    // untuk dapat jam ke berapa dr shift tsb, 
+    // e.g. jam ke 1 dari shift
+    const hourNow = moment().format('H');
+    let jamKe = (hourNow - currentShift.start) + 1;
+
+    // to handle shift 3
+    if(currentShift.end < currentShift.start && hourNow < currentShift.start){
+        jamKe = parseInt(hourNow) + 1;
+    }
+
+    const activeBlock = schedulePattern.find(v => v.block == blocks) || {};
+    const blockPattern = activeBlock.patterns || [];
+    const activeFloor = blockPattern['pattern_' + jamKe] || '';
+    const activeIDX = activeFloor.split(',');
+    
+    dispatch({ type: 'SCHEDULE_ACTIVE_FLOOR', payload: activeIDX });
+};
+
 export const { Provider, Context} = createDataContext(
     scheduleReducer,
-    { fetchSchedule, fetchSchedulePattern, getCurrentShift },
+    { fetchSchedule, fetchSchedulePattern, getCurrentShift, getActiveFloor },
 
     // default state reduce
-    { currentShift: {}, schedulePattern: [] }
+    { currentShift: {}, schedulePattern: [], activeFloor: [] }
 )
