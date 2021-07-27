@@ -43,16 +43,16 @@ const styles = StyleSheet.create({
   },
 });
 
-const Accordion = () => {
+const Accordion = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Markets</Text>
-      <List {...{ list }} />
-      <List list={list2} />
-      <List list={list3} />
-      <List {...{ list }} />
-      <List {...{ list }} />
-      <List {...{ list }} />
+      <List navigation {...{ list }} />
+      <List navigation list={list2} />
+      <List navigation list={list3} />
+      <List navigation {...{ list }} />
+      <List navigation {...{ list }} />
+      <List navigation {...{ list }} />
     </View>
   );
 };

@@ -71,9 +71,9 @@ const ReportDetailScreen = ({ navigation, state }) => {
   return (<>
       <ScrollView style={styles.screen}>
         <Text style={{fontSize: 24, fontWeight: 'bold'}}>{headerTitle}</Text>
-        <List key={`kebersihan`} list={listKebersihan} />
-        <List key={`keamanan`} list={listKeamanan} />
-        <List key={`fungsional`} list={listFungsional} />
+        <List navigation={navigation} key={`kebersihan`} list={listKebersihan} />
+        <List navigation={navigation} key={`keamanan`} list={listKeamanan} />
+        <List navigation={navigation} key={`fungsional`} list={listFungsional} />
         <View style={{ marginTop: 20 }}>
           <Button 
               buttonStyle={styles.button}

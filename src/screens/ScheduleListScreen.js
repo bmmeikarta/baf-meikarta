@@ -41,7 +41,7 @@ const ScheduleListScreen = ({ navigation, showActiveOnly, parentComponent }) => 
             <View style={{ paddingBottom: 20 }}>
                 {
                     (dataUnit || []).map((datum, idx) => { // This will render a row for each data element.
-                        const statusFloor = getStatusFloor(currentShift, schedulePattern, datum.blocks, idx);
+                        const statusFloor = getStatusFloor(currentShift, schedulePattern, datum.blocks, datum.floor);
                         const floorName = datum.block_name + ' - ' + datum.floor;
 
                         if(showActiveOnly && statusFloor != 'active') return false;
@@ -62,7 +62,7 @@ const ScheduleListScreen = ({ navigation, showActiveOnly, parentComponent }) => 
     )
 };
 
-const getStatusFloor = (currentShift, schedulePattern, blocks, idx) => {
+const getStatusFloor = (currentShift, schedulePattern, blocks, floor) => {
 
     // untuk dapat jam ke berapa dr shift tsb, 
     // e.g. jam ke 1 dari shift
@@ -86,8 +86,8 @@ const getStatusFloor = (currentShift, schedulePattern, blocks, idx) => {
     }
     const inactiveIDX = inactiveFloor.split(',');
     
-    if(inactiveIDX.includes(idx.toString())) return 'inactive';
-    if(activeIDX.includes(idx.toString())) return 'active';
+    if(inactiveIDX.includes(floor.toString())) return 'inactive';
+    if(activeIDX.includes(floor.toString())) return 'active';
     
     return 'future';
 
@@ -128,7 +128,7 @@ const RenderRow = ({ navigation, floor, floorName, statusFloor, parentComponent 
 }
 
 
-const Timer = ({getCurrentShift}) => {
+export const Timer = ({getCurrentShift}) => {
     const [timeLeft, setTimeLeft] = useState('--:--');
 
     // console.log(state);

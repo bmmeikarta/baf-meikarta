@@ -21,9 +21,9 @@ interface CheckmarkProps {
     checkmarkProgress: Animated.SharedValue<number>;
 }
 
-const Checkmark = ({ checkmarkProgress, size }) => {
+const Checkmark = ({ checkmarkProgress, size, activeColor }) => {
   const style = useAnimatedStyle(() => ({
-    backgroundColor: mixColor(checkmarkProgress.value, "#525251", "#1dd909"),
+    backgroundColor: mixColor(checkmarkProgress.value, "#525251", activeColor || "#1dd909"),
     transform: [{ rotateX: `${mix(checkmarkProgress.value*2, 0, Math.PI)}rad` }],
   }));
   

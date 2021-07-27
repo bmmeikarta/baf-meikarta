@@ -104,8 +104,7 @@ const getCurrentShift = dispatch => async (x) => {
     dispatch({ type: 'SCHEDULE_CURRENT_SHIFT', payload: currentShift });
 }
 
-const getActiveFloor = dispatch => (blocks) => {
-    const { currentShift, schedulePattern } = dispatch({});
+const getActiveFloor = dispatch => (currentShift, schedulePattern, blocks) => {
 
     // untuk dapat jam ke berapa dr shift tsb, 
     // e.g. jam ke 1 dari shift

@@ -53,7 +53,7 @@ interface ListItemProps {
   isLast: boolean;
 }
 
-const ListItem = ({ question, isLast }) => {
+const ListItem = ({ navigation, question, isLast }) => {
   const aref = useAnimatedRef<View>();
   const bottomRadius = isLast ? 8 : 0;
   const checkmark = useSharedValue(false);
@@ -72,15 +72,6 @@ const ListItem = ({ question, isLast }) => {
   }));
 
   return (<>
-    <Animated.View
-      style={[
-        styles.container,
-        {
-          borderBottomLeftRadius: bottomRadius,
-          borderBottomRightRadius: bottomRadius,
-        },
-      ]}
-    >
       <TouchableWithoutFeedback
         onPress={() => {
           if (height.value === 0) {
@@ -92,12 +83,22 @@ const ListItem = ({ question, isLast }) => {
           checkmark.value = !checkmark.value;
         }}
       >
-        <Animated.View style={{marginRight: 30}}>
-          <Checkmark {...{ checkmarkProgress }} size={15}/>
-        </Animated.View>
-      </TouchableWithoutFeedback>
-      <Text style={styles.name}>{question.label}</Text>
-    </Animated.View>
+      <Animated.View
+        style={[
+          styles.container,
+          {
+            borderBottomLeftRadius: bottomRadius,
+            borderBottomRightRadius: bottomRadius,
+          },
+        ]}
+      >
+        
+          <Animated.View style={{marginRight: 30}}>
+            <Checkmark {...{ checkmarkProgress }} size={15} activeColor={'#349ceb'}/>
+          </Animated.View>
+        <Text style={styles.name}>{question.label}</Text>
+      </Animated.View>
+    </TouchableWithoutFeedback>
     <Animated.View style={[styles.items, style]}>
       <View
         ref={aref}
@@ -109,6 +110,7 @@ const ListItem = ({ question, isLast }) => {
       >
       {(question.items || []).map((item, key) => (
           <ListChildItem
+            navigation={navigation}
             key={key}
             isLast={key === question.items.length - 1}
             {...{ item }}

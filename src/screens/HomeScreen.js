@@ -1,10 +1,21 @@
-import React from "react";
+import React, { useContext } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import {Text, Button} from "react-native-elements";
-import { SafeAreaView } from "react-navigation";
+import { NavigationEvents, SafeAreaView } from "react-navigation";
+import { Context as ScheduleContext } from "../context/ScheduleContext";
 
 const HomeScreen = ({ navigation }) => {
+    const { fetchSchedule, fetchSchedulePattern, getCurrentShift } = useContext(ScheduleContext);
+
     return (
+    <>
+        <NavigationEvents 
+            onWillFocus={async() => {
+                await fetchSchedule();
+                await fetchSchedulePattern();
+                await getCurrentShift();
+            }}
+        />
         <SafeAreaView style={styles.screen}>
             <Button 
                 buttonStyle={styles.button}
@@ -35,6 +46,7 @@ const HomeScreen = ({ navigation }) => {
                 </View>
             </View>
         </SafeAreaView>
+    </>
     )
 };
 

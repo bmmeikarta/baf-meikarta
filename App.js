@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import HomeScreen from "./src/screens/HomeScreen";
 import ReportListScreen from "./src/screens/ReportListScreen";
+import ReportZoneScreen from "./src/screens/ReportZoneScreen";
 import ReportDetailScreen from "./src/screens/ReportDetailScreen";
 import ScheduleListScreen from "./src/screens/ScheduleListScreen";
 import ScheduleDetailScreen from "./src/screens/ScheduleDetailScreen";
@@ -17,6 +18,7 @@ import AccountScreen from "./src/screens/AccountScreen";
 import SigninScreen from "./src/screens/SigninScreen";
 import ResolveAuthScreen from './src/screens/ResolveAuthScreen';
 import { StyleSheet, Text } from 'react-native';
+import ScannerScreen from './src/screens/ScannerScreen';
 
 const styles = StyleSheet.create({
   headerTitle: {
@@ -75,10 +77,22 @@ const switchNavigator = createSwitchNavigator({
             headerTitle: ()=><Text style={styles.headerTitle}>{'Complaint'}</Text>,
           }
         },
+        ReportZone: {
+          screen: ReportZoneScreen,
+          navigationOptions: {
+            headerTitle: ()=><Text style={styles.headerTitle}>{'Choose Zone'}</Text>,
+          }
+        },
         ReportDetail: {
           screen: ReportDetailScreen,
           navigationOptions: {
             headerTitle: ()=><Text style={styles.headerTitle}>{'Complaint Detail'}</Text>,
+          }
+        },
+        ReportScanner: {
+          screen: ScannerScreen,
+          navigationOptions: {
+            headerTitle: ()=><Text style={styles.headerTitle}>{'Asset Reading'}</Text>,
           }
         },
       }),

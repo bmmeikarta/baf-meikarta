@@ -65,7 +65,7 @@ interface ListProps {
   list: List;
 }
 
-const List = ({ list }) => {
+const List = ({ navigation, list }) => {
   const aref = useAnimatedRef<View>();
   const arefChild = useAnimatedRef<View>();
   const open = useSharedValue(false);
@@ -104,7 +104,7 @@ const List = ({ list }) => {
               }}
             >
               <Animated.View style={{marginRight: 30}}>
-                <Checkmark {...{ checkmarkProgress }} size={20}/>
+                <Checkmark {...{ checkmarkProgress }} size={20} activeColor={null}/>
               </Animated.View>
             </TouchableWithoutFeedback>
 
@@ -137,6 +137,7 @@ const List = ({ list }) => {
         >
           {list.questions.map((question, key) => (
             <Item
+              navigation={navigation}
               key={key}
               isLast={key === list.questions.length - 1}
               {...{ question }}
