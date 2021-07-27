@@ -22,6 +22,69 @@ const scheduleReducer = (state, action) => {
     }
 };
 
+const mapWorkHour = [
+    {
+        job: 12, // CSO
+        work_hour: [
+            {
+                shift: 1,
+                start: 8,
+                end: 15
+            },
+            {
+                shift: 2,
+                start: 15,
+                end: 22
+            },
+            {
+                shift: 3,
+                start: 22,
+                end: 5
+            },
+        ]
+    },
+    {
+        job: 14, // SEC
+        work_hour: [
+            {
+                shift: 1,
+                start: 8,
+                end: 15
+            },
+            {
+                shift: 2,
+                start: 15,
+                end: 22
+            },
+            {
+                shift: 3,
+                start: 22,
+                end: 5
+            },
+        ]
+    },
+    {
+        job: 21, // ENG
+        work_hour: [
+            {
+                shift: 1,
+                start: 8,
+                end: 15
+            },
+            {
+                shift: 2,
+                start: 15,
+                end: 22
+            },
+            {
+                shift: 3,
+                start: 22,
+                end: 5
+            },
+        ]
+    }
+];
+
 const processError = (error) => {
     if(error.response.status == 401){
         Alert.alert('Authorization Failed', 'Silahkan melakukan login kembali', [
@@ -48,7 +111,17 @@ const fetchSchedulePattern = dispatch => async () => {
 const fetchSchedule = dispatch => async () => {
     try {
         const response = await easymoveinApi.get('/get_schedule.php');
-        dispatch({ type: 'SCHEDULE_FETCH', payload: response.data });
+        const data = response.data || [];
+        const masterUnit = data.master_unit || [];
+
+        const concatData = [
+            { blocks: masterUnit[0].blocks, block_name: masterUnit[0].block_name, floor: 'Rooftop', tower: masterUnit[0].tower },
+            { blocks: masterUnit[0].blocks, block_name: masterUnit[0].block_name, floor: 'Lobby', tower: masterUnit[0].tower }
+        ]
+
+        data.master_unit = data.master_unit.concat(concatData);
+        
+        dispatch({ type: 'SCHEDULE_FETCH', payload: data });
     } catch (error) {
         processError(error);
     }
@@ -58,38 +131,16 @@ const getCurrentShift = dispatch => async (x) => {
     const token = await AsyncStorage.getItem('token');
     const userDetail = jwtDecode(token);
     
-    const job = 'CSO'; // TODO: get from profile
+    const job = userDetail.data.profile_id; // TODO: get from profile
     let shift = userDetail.data.shift;
     const hourNow = moment().format('H');
 
     if(!shift){
-        if(hourNow >= 7 && hourNow < 15) shift = 1;
-        if(hourNow >= 15 && hourNow < 23) shift = 2;
-        if(hourNow >= 23 || hourNow < 7) shift = 3;
+        if(hourNow >= 8 && hourNow < 15) shift = 1;
+        if(hourNow >= 15 && hourNow < 22) shift = 2;
+        if(hourNow >= 22 || hourNow < 5) shift = 3;
     }
-    const mapWorkHour = [
-        {
-            job: 'CSO',
-            work_hour: [
-                {
-                    shift: 1,
-                    start: 7,
-                    end: 15
-                },
-                {
-                    shift: 2,
-                    start: 15,
-                    end: 23
-                },
-                {
-                    shift: 3,
-                    start: 23,
-                    end: 7
-                },
-            ]
-        }
-    ];
-
+    
     // check user shift
     const currentJob = mapWorkHour.find(v => v.job == job) || {};
     const currentShift = (currentJob.work_hour || [])
@@ -104,7 +155,11 @@ const getCurrentShift = dispatch => async (x) => {
     dispatch({ type: 'SCHEDULE_CURRENT_SHIFT', payload: currentShift });
 }
 
-const getActiveFloor = dispatch => (currentShift, schedulePattern, blocks) => {
+const getActiveFloor = dispatch => async(currentShift, schedulePattern, blocks) => {
+    const token = await AsyncStorage.getItem('token');
+    const userDetail = jwtDecode(token);
+    
+    const job = userDetail.data.profile_id;
 
     // untuk dapat jam ke berapa dr shift tsb, 
     // e.g. jam ke 1 dari shift
@@ -116,7 +171,7 @@ const getActiveFloor = dispatch => (currentShift, schedulePattern, blocks) => {
         jamKe = parseInt(hourNow) + 1;
     }
 
-    const activeBlock = schedulePattern.find(v => v.block == blocks) || {};
+    const activeBlock = schedulePattern.find(v => v.block == blocks && v.job == job) || {};
     const blockPattern = activeBlock.patterns || [];
     const activeFloor = blockPattern['pattern_' + jamKe] || '';
     const activeIDX = activeFloor.split(',');
