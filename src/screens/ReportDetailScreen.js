@@ -20,16 +20,24 @@ const listKeamanan = {
         { name: 'Lampu Lorong', status: '' },
         { name: 'Sprinkler', status: '' },
         { name: 'Smoke Detector', status: '' },
+        { name: 'Speaker', status: '' },
+        { name: 'Hydrant', status: '' },
+        { name: 'CCTV', status: '' },
+        { name: 'Building / Exit Signage', status: '' },
+        { name: 'Lampu TL Emergency Exit', status: '' },
       ]
     },
     { 
-      label: "Object Kotor",
-      items: [
-        { name: 'APAR', status: '' },
-        { name: 'Lampu Lorong', status: '' },
-        { name: 'Sprinkler', status: '' },
-        { name: 'Smoke Detector', status: '' },
-      ]
+      label: "Personel Mencurigakan",
+      items: []
+    },
+    { 
+      label: "Pelanggaran Ketertiban Penghuni",
+      items: []
+    },
+    { 
+      label: "Pengerusakan Assets / Grafiti",
+      items: []
     },
   ],
 };
@@ -44,7 +52,16 @@ const listFungsional = {
         { name: 'Lampu Lorong', status: '' },
         { name: 'Sprinkler', status: '' },
         { name: 'Smoke Detector', status: '' },
+        { name: 'Speaker', status: '' },
+        { name: 'Hydrant', status: '' },
+        { name: 'CCTV', status: '' },
+        { name: 'Building / Exit Signage', status: '' },
+        { name: 'Lampu TL Emergency Exit', status: '' },
       ]
+    },
+    { 
+      label: "Others",
+      items: []
     },
   ],
 };

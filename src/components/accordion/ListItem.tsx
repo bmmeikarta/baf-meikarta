@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, View, TouchableWithoutFeedback } from "react-native";
 import Animated, {
@@ -11,6 +12,7 @@ import Animated, {
   runOnUI,
 } from "react-native-reanimated";
 import Checkmark from "./Checkmark";
+import ContainerImagePicker from './ContainerImagePicker';
 import ListChildItem from "./ListChildItem";
 
 const LIST_ITEM_HEIGHT = 54;
@@ -108,6 +110,13 @@ const ListItem = ({ navigation, question, isLast }) => {
             },
         }) => console.log()}
       >
+
+      {/* JIKA TIDAK ADA CHILD, MAKA LANGSUNG AMBIL FOTO AJA */}
+      {question.items.length == 0 && 
+        <ContainerImagePicker />
+      }
+
+      {/* JIKA ADA CHILD, TAMPILKAN ITEM UNTUK DI SCAN */}
       {(question.items || []).map((item, key) => (
           <ListChildItem
             navigation={navigation}

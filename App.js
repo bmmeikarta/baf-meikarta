@@ -4,6 +4,7 @@ import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 import { Provider as AuthProvider } from './src/context/AuthContext'; 
 import { Provider as ScheduleProvider } from './src/context/ScheduleContext';
+import { Provider as ReportProvider } from './src/context/ReportContext';
 import { setNavigator } from './src/navigationRef';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -134,9 +135,11 @@ export default () => {
   return (
     <AuthProvider>
       <ScheduleProvider>
-        <App 
-          ref={(navigator) => { setNavigator(navigator) }} 
-        />
+        <ReportProvider>
+          <App 
+            ref={(navigator) => { setNavigator(navigator) }} 
+          />
+        </ReportProvider>
       </ScheduleProvider>
     </AuthProvider>
   )

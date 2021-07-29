@@ -1,14 +1,18 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useContext } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
 import {Text, Button} from "react-native-elements";
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { Ionicons } from '@expo/vector-icons';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { Context as ReportContext } from '../context/ReportContext';
 
 const ScannerScreen = ({ navigation }) => {
-  const [hasPermission, setHasPermission] = useState(null);
-  const [scanned, setScanned] = useState(false);
-  const [listItem, setListItem] = useState([]);
+    const { state, addReportItem } = useContext(ReportContext);
+    const { listReportItem } = state;
+
+    const [hasPermission, setHasPermission] = useState(null);
+    const [scanned, setScanned] = useState(false);
+    const [listItem, setListItem] = useState([]);
 
 //   useLayoutEffect(() => {
 //     navigation.setOptions({
@@ -44,6 +48,7 @@ const ScannerScreen = ({ navigation }) => {
         {
           text: 'Yes',
           onPress: () => {
+            addReportItem([...listItem, data]);
             setListItem([...listItem, data]);
           }
         },
@@ -64,6 +69,7 @@ const ScannerScreen = ({ navigation }) => {
           onPress: () => {
             listItem.splice(key, 1);
 
+            addReportItem([...listItem]);
             setListItem([...listItem]);
           }
         },

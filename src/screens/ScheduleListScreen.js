@@ -67,8 +67,11 @@ const ScheduleListScreen = ({ navigation, showActiveOnly, parentComponent }) => 
     )
 };
 
-const getStatusFloor = (userDetail, currentShift, schedulePattern, blocks, floor) => {
-    const job = ((userDetail || {}).data || {}).profile_id;
+export const getStatusFloor = (userDetail, currentShift, schedulePattern, blocks, floor) => {
+    let job = ((userDetail || {}).data || {}).profile_id;
+    
+    if([21,14,12].includes(job) == false) job = 12; // DEFAULT CSO
+    
     // untuk dapat jam ke berapa dr shift tsb, 
     // e.g. jam ke 1 dari shift
     const hourNow = moment().format('H');

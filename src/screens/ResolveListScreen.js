@@ -5,7 +5,7 @@ import Accordion from "../components/accordion/Accordion";
 const ResolveListScreen = props => {
     return (
         <View style={styles.screen}>
-            <Accordion></Accordion>
+            <Text>Resolve Screen !</Text>
         </View>
     )
 };

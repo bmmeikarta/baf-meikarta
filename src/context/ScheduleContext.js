@@ -131,9 +131,12 @@ const getCurrentShift = dispatch => async (x) => {
     const token = await AsyncStorage.getItem('token');
     const userDetail = jwtDecode(token);
     
-    const job = userDetail.data.profile_id; // TODO: get from profile
+    let job = userDetail.data.profile_id; // TODO: get from profile
     let shift = userDetail.data.shift;
+
     const hourNow = moment().format('H');
+
+    if([21,14,12].includes(job) == false) job = 12; // DEFAULT CSO 
 
     if(!shift){
         if(hourNow >= 8 && hourNow < 15) shift = 1;
@@ -159,7 +162,9 @@ const getActiveFloor = dispatch => async(currentShift, schedulePattern, blocks) 
     const token = await AsyncStorage.getItem('token');
     const userDetail = jwtDecode(token);
     
-    const job = userDetail.data.profile_id;
+    let job = userDetail.data.profile_id;
+
+    if([21,14,12].includes(job) == false) job = 12; // DEFAULT CSO 
 
     // untuk dapat jam ke berapa dr shift tsb, 
     // e.g. jam ke 1 dari shift

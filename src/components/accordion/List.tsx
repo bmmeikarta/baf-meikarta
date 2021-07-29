@@ -10,51 +10,11 @@ import Animated, {
   withTiming,
   runOnUI,
 } from "react-native-reanimated";
-import { Ionicons } from '@expo/vector-icons';
-
 import Chevron from "./Chevron";
 import Item, { ListItem } from "./ListItem";
 import Checkmark from "./Checkmark";
 import ListChildItem from "./ListChildItem";
-
-const styles = StyleSheet.create({
-  container: {
-    marginTop: 16,
-    backgroundColor: "white",
-    padding: 16,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  groupBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  items: {
-    overflow: "hidden",
-  },
-  checkmarkContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: '#525251',
-    height: 30,
-    width: 30,
-    borderRadius: 30 / 2,
-    marginRight: 30
-  },
-  checkmark: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center'
-  }
-});
+import ContainerImagePicker from "./ContainerImagePicker";
 
 export interface List {
   name: string;
@@ -135,6 +95,13 @@ const List = ({ navigation, list }) => {
             },
           }) => console.log('')}
         >
+
+          {/* JIKA TIDAK ADA CHILD, MAKA LANGSUNG AMBIL FOTO AJA */}
+          {list.questions.length == 0 && 
+            <ContainerImagePicker />
+          }
+
+          {/* JIKA ADA CHILD, TAMPILKAN ITEM UNTUK DI SCAN */}
           {list.questions.map((question, key) => (
             <Item
               navigation={navigation}
@@ -148,5 +115,46 @@ const List = ({ navigation, list }) => {
     </>
   );
 };
+
+
+const LIST_ITEM_HEIGHT = 54;
+const styles = StyleSheet.create({
+  container: {
+    marginTop: 16,
+    backgroundColor: "white",
+    padding: 16,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  groupBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  items: {
+    overflow: "hidden",
+  },
+  checkmarkContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: '#525251',
+    height: 30,
+    width: 30,
+    borderRadius: 30 / 2,
+    marginRight: 30
+  },
+  checkmark: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center'
+  },
+});
 
 export default List;

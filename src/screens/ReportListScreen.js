@@ -1,13 +1,16 @@
 import React, { useContext } from "react";
 import { StyleSheet, Text, View, ScrollView } from "react-native";
 import { Button } from "react-native-elements";
-import { Timer } from "./ScheduleListScreen";
+import { Timer, getStatusFloor } from "./ScheduleListScreen";
 import { NavigationEvents } from "react-navigation";
 import { Context as ScheduleContext } from '../context/ScheduleContext';
+import { Context as AuthContext } from '../context/AuthContext';
 
 const ReportListScreen = ({ navigation }) => {
+  const { state: authState } = useContext(AuthContext);
   const { state, fetchSchedule, fetchSchedulePattern, getCurrentShift, getActiveFloor } = useContext(ScheduleContext);
   const { master_unit, activeFloor, currentShift, schedulePattern } = state;
+  const { userDetail } = authState;
   const dataUnit = (master_unit || []);
 
   return (
@@ -22,6 +25,9 @@ const ReportListScreen = ({ navigation }) => {
       />
       <ScrollView style={styles.screen}>
         <Timer getCurrentShift={getCurrentShift}></Timer>
+        { dataUnit.length == 0 &&
+            <Text style={styles.textBlockName}>loading..</Text>
+        }
         { dataUnit.length > 0 &&
             <Text style={styles.textBlockName}>{dataUnit[0].block_name} - {dataUnit[0].tower}</Text>
         }
@@ -29,12 +35,19 @@ const ReportListScreen = ({ navigation }) => {
 
           {dataUnit.map((v, key) => {
 
-            const isActive = activeFloor.includes(v.floor);
+            const statusFloor = getStatusFloor(userDetail, currentShift, schedulePattern, v.blocks, v.floor);
+
+            let bgZone = '#000';
+            if(statusFloor == 'inactive'){
+                bgZone = '#ffd35c';
+            }else if(statusFloor == 'active'){
+                bgZone = '#6598eb';
+            }
 
             return <View key={key} style={styles.container}>
               <Button 
-                buttonStyle={{ backgroundColor: `${isActive ? '#6598eb': '#000'}` }}
-                onPress={() => isActive ? navigation.navigate('ReportZone', { ...v }) : null}
+                buttonStyle={{ backgroundColor: `${bgZone}` }}
+                onPress={() => statusFloor == 'active' ? navigation.navigate('ReportZone', { ...v }) : null}
                 title={v.floor}
               />
             </View>
