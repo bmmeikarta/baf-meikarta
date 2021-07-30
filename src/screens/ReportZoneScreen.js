@@ -1,12 +1,16 @@
-import React from "react";
+import React, { useContext } from "react";
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
 import Svg, { Rect } from "react-native-svg";
+import { Context as ReportContext } from '../context/ReportContext';
 
 const ReportZoneScreen = ({ navigation }) => {
-    const { block_name, tower, floor } = navigation.state.params;
+    const { state, setCurrentZone } = useContext(ReportContext);
+    const { block_name, blocks, tower, floor } = navigation.state.params;
+    const { currentReportZone } =  state;
 
     const onChooseZone = (zone) => {
         const floorName = block_name + ' - ' + tower + ' - ' + floor + ' - Zone ' + zone;
+        setCurrentZone({blocks, tower, floor, zone});
         navigation.navigate('ReportDetail', { headerTitle: `${floorName}` })
     };
     const checkZoneStored = () => {};

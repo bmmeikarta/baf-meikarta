@@ -7,12 +7,13 @@ import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { Context as ReportContext } from '../context/ReportContext';
 
 const ScannerScreen = ({ navigation }) => {
-    const { state, addReportItem } = useContext(ReportContext);
-    const { listReportItem } = state;
+    const { state, addScanItem } = useContext(ReportContext);
+    const { currentReportScan, listReportScan } = state;
+    const dataScan = (listReportScan || []).find(v => v.category == currentReportScan.category && v.problem == currentReportScan.problem && v.item_name == currentReportScan.item_name) || {};
 
     const [hasPermission, setHasPermission] = useState(null);
     const [scanned, setScanned] = useState(false);
-    const [listItem, setListItem] = useState([]);
+    const [listItem, setListItem] = useState([...(dataScan.scan_item || [])]);
 
 //   useLayoutEffect(() => {
 //     navigation.setOptions({
@@ -48,7 +49,7 @@ const ScannerScreen = ({ navigation }) => {
         {
           text: 'Yes',
           onPress: () => {
-            addReportItem([...listItem, data]);
+            // addReportItem([...listItem, data]);
             setListItem([...listItem, data]);
           }
         },
@@ -69,13 +70,33 @@ const ScannerScreen = ({ navigation }) => {
           onPress: () => {
             listItem.splice(key, 1);
 
-            addReportItem([...listItem]);
             setListItem([...listItem]);
           }
         },
       ]
     )
-  }
+  };
+
+  const handleSubmit = ( navigation ) => {
+    
+    Alert.alert(
+      'Submitting Scan Items...',
+      '\nAre you sure want to submit ?',
+      [
+        {
+          text: 'No'
+        },
+        {
+          text: 'Yes',
+          onPress: () => {
+            // addReportItem([...listItem, data]);
+            addScanItem((listReportScan || []), { ...currentReportScan, scan_item: [ ...listItem ] });
+            navigation.goBack();
+          }
+        },
+      ]
+    )
+  };
 
   // Check permissions and return the screens
   if (hasPermission === null) {
@@ -118,6 +139,7 @@ const ScannerScreen = ({ navigation }) => {
       ))}
       {listItem.length > 0 &&
         <Button
+          onPress={() => handleSubmit(navigation)}
           buttonStyle={{marginTop: 20, backgroundColor: 'green', borderRadius: 20, height: 55}}
           title={'Submit'}
         ></Button>

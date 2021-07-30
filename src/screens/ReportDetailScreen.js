@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useContext } from "react";
 import { StyleSheet, Text, View, ScrollView } from "react-native";
 import { Button } from "react-native-elements";
 import { NavigationEvents } from "react-navigation";
+import { Context as ReportContext } from '../context/ReportContext';
 
 import List, { List as ListModel } from "../components/accordion/List";
 
@@ -82,10 +83,25 @@ const styles = StyleSheet.create({
 },
 });
 
-const ReportDetailScreen = ({ navigation, state }) => {
+const ReportDetailScreen = ({ navigation }) => {
+  const { state, getReportState, addReportItem } = useContext(ReportContext);
   const { headerTitle } = navigation.state.params;
-  const doSubmit = () => {};
+  const { currentReportZone, listReportScan } = state;
+
+  // console.log('Scanned Item', listReportScan);
+
+  const doSubmit = (navigation) => {
+    addReportItem({ ...currentReportZone, listReportScan });
+    navigation.navigate('Home')
+  };
+
   return (<>
+      <NavigationEvents 
+        on
+        onWillFocus={async() => {
+          await getReportState();
+        }}
+      />
       <ScrollView style={styles.screen}>
         <Text style={{fontSize: 24, fontWeight: 'bold'}}>{headerTitle}</Text>
         <List navigation={navigation} key={`kebersihan`} list={listKebersihan} />
@@ -95,7 +111,7 @@ const ReportDetailScreen = ({ navigation, state }) => {
           <Button 
               buttonStyle={styles.button}
               title="Submit" 
-              onPress={()=> console.log('Submitted')} 
+              onPress={()=> doSubmit(navigation)} 
           />
         </View>
         <View style={{ marginBottom: 40 }}></View>

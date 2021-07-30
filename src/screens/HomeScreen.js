@@ -3,14 +3,19 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 import {Text, Button} from "react-native-elements";
 import { NavigationEvents, SafeAreaView } from "react-navigation";
 import { Context as ScheduleContext } from "../context/ScheduleContext";
+import { Context as ReportContext } from "../context/ReportContext";
 
 const HomeScreen = ({ navigation }) => {
     const { fetchSchedule, fetchSchedulePattern, getCurrentShift } = useContext(ScheduleContext);
+    const { state, localToState, getReportState } = useContext(ReportContext);
+
+    console.log('HOME ', state.listReportItem);
 
     return (
     <>
         <NavigationEvents 
             onWillFocus={async() => {
+                // await localToState();
                 await fetchSchedule();
                 await fetchSchedulePattern();
                 await getCurrentShift();

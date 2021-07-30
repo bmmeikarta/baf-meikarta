@@ -5,13 +5,17 @@ import Animated from "react-native-reanimated";
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
-const ImagePickerOnList = () => {
+const ContainerImagePicker = ({ header }) => {
     const takeImageHandler = () => {
       ImagePicker.launchCameraAsync();
     };
   
     return (<>
+          {header && 
+            <Text style={styles.header}>{header || ''}</Text>
+          }
           <Animated.View style={[styles.detail]}>
+              
               <View style={styles.detailCol}>
                   <Text>{'Foto'}</Text>
                   <TouchableWithoutFeedback onPress={takeImageHandler}>
@@ -29,6 +33,11 @@ const ImagePickerOnList = () => {
 
 const LIST_ITEM_HEIGHT = 54;
 const styles = StyleSheet.create({
+    header: {
+        backgroundColor: '#b8b8b8',
+        paddingVertical: 8,
+        paddingHorizontal: 30,
+    },
     detail: {
         backgroundColor: "#ebebeb",
         flexDirection: "row",
@@ -57,4 +66,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ImagePickerOnList;
+export default ContainerImagePicker;

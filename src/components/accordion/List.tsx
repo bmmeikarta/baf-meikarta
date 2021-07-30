@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
 import Animated, {
   useAnimatedRef,
@@ -15,6 +15,7 @@ import Item, { ListItem } from "./ListItem";
 import Checkmark from "./Checkmark";
 import ListChildItem from "./ListChildItem";
 import ContainerImagePicker from "./ContainerImagePicker";
+import { Context as ReportContext } from '../../context/ReportContext';
 
 export interface List {
   name: string;
@@ -26,6 +27,9 @@ interface ListProps {
 }
 
 const List = ({ navigation, list }) => {
+  const { state } = useContext(ReportContext);
+  const { currentReportZone, listReportItem } = state;
+
   const aref = useAnimatedRef<View>();
   const arefChild = useAnimatedRef<View>();
   const open = useSharedValue(false);
@@ -98,7 +102,7 @@ const List = ({ navigation, list }) => {
 
           {/* JIKA TIDAK ADA CHILD, MAKA LANGSUNG AMBIL FOTO AJA */}
           {list.questions.length == 0 && 
-            <ContainerImagePicker />
+            <ContainerImagePicker header={null}/>
           }
 
           {/* JIKA ADA CHILD, TAMPILKAN ITEM UNTUK DI SCAN */}
@@ -107,6 +111,7 @@ const List = ({ navigation, list }) => {
               navigation={navigation}
               key={key}
               isLast={key === list.questions.length - 1}
+              category={list.title}
               {...{ question }}
             />
           ))}

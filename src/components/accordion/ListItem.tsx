@@ -55,7 +55,7 @@ interface ListItemProps {
   isLast: boolean;
 }
 
-const ListItem = ({ navigation, question, isLast }) => {
+const ListItem = ({ navigation, category, question, isLast }) => {
   const aref = useAnimatedRef<View>();
   const bottomRadius = isLast ? 8 : 0;
   const checkmark = useSharedValue(false);
@@ -113,7 +113,7 @@ const ListItem = ({ navigation, question, isLast }) => {
 
       {/* JIKA TIDAK ADA CHILD, MAKA LANGSUNG AMBIL FOTO AJA */}
       {question.items.length == 0 && 
-        <ContainerImagePicker />
+        <ContainerImagePicker header={null}/>
       }
 
       {/* JIKA ADA CHILD, TAMPILKAN ITEM UNTUK DI SCAN */}
@@ -122,6 +122,8 @@ const ListItem = ({ navigation, question, isLast }) => {
             navigation={navigation}
             key={key}
             isLast={key === question.items.length - 1}
+            category={category}
+            problem={question.label}
             {...{ item }}
           />
       ))}

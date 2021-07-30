@@ -5,18 +5,22 @@ import { Timer, getStatusFloor } from "./ScheduleListScreen";
 import { NavigationEvents } from "react-navigation";
 import { Context as ScheduleContext } from '../context/ScheduleContext';
 import { Context as AuthContext } from '../context/AuthContext';
+import { Context as ReportContext } from '../context/ReportContext';
 
 const ReportListScreen = ({ navigation }) => {
   const { state: authState } = useContext(AuthContext);
+  const { state: reportState, resetReportScan } = useContext(ReportContext);
   const { state, fetchSchedule, fetchSchedulePattern, getCurrentShift, getActiveFloor } = useContext(ScheduleContext);
   const { master_unit, activeFloor, currentShift, schedulePattern } = state;
   const { userDetail } = authState;
   const dataUnit = (master_unit || []);
 
+  // console.log('REPORT LIST ', reportState);
   return (
     <>
       <NavigationEvents 
         onWillFocus={async() => {
+          await resetReportScan();
           await fetchSchedule();
           await fetchSchedulePattern();
           await getCurrentShift();
@@ -37,17 +41,17 @@ const ReportListScreen = ({ navigation }) => {
 
             const statusFloor = getStatusFloor(userDetail, currentShift, schedulePattern, v.blocks, v.floor);
 
-            let bgZone = '#000';
-            if(statusFloor == 'inactive'){
-                bgZone = '#ffd35c';
-            }else if(statusFloor == 'active'){
-                bgZone = '#6598eb';
-            }
+            let bgFloor = '#000';
+            if(statusFloor == 'active') bgFloor = '#6598eb';
+            if(statusFloor == 'on progress') bgFloor = '#dfe305';
+            if(statusFloor == 'done') bgFloor = '#41db30';
 
+            const canAccess = statusFloor == 'active' || statusFloor == 'on progress';
+            
             return <View key={key} style={styles.container}>
               <Button 
-                buttonStyle={{ backgroundColor: `${bgZone}` }}
-                onPress={() => statusFloor == 'active' ? navigation.navigate('ReportZone', { ...v }) : null}
+                buttonStyle={{ backgroundColor: `${bgFloor}` }}
+                onPress={() => canAccess ? navigation.navigate('ReportZone', { ...v }) : null}
                 title={v.floor}
               />
             </View>

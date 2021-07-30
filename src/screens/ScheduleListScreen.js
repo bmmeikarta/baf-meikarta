@@ -4,6 +4,7 @@ import moment from 'moment';
 import { NavigationEvents } from "react-navigation";
 import { Context as ScheduleContext } from '../context/ScheduleContext';
 import { Context as AuthContext } from '../context/AuthContext';
+import { Context as ReportContext } from '../context/ReportContext';
 import { navigate } from "../navigationRef";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import jwtDecode from "jwt-decode";
@@ -13,6 +14,7 @@ const ScheduleListScreen = ({ navigation, showActiveOnly, parentComponent }) => 
     const { state, fetchSchedule, fetchSchedulePattern, getCurrentShift } = useContext(ScheduleContext);
     const { master_unit, currentShift, schedulePattern } = state;
     const { userDetail } = authState;
+    
 
     const dataUnit = (master_unit || []);
     // if(Object.keys(currentShift).length == 0){
@@ -53,6 +55,8 @@ const ScheduleListScreen = ({ navigation, showActiveOnly, parentComponent }) => 
                         return <RenderRow 
                                     navigation={navigation} 
                                     floorName={floorName} 
+                                    block={datum.blocks}
+                                    tower={datum.tower}
                                     key={datum.floor} 
                                     floor={datum.floor} 
                                     statusFloor={statusFloor}
@@ -68,6 +72,9 @@ const ScheduleListScreen = ({ navigation, showActiveOnly, parentComponent }) => 
 };
 
 export const getStatusFloor = (userDetail, currentShift, schedulePattern, blocks, floor) => {
+    const { state: reportState } = useContext(ReportContext);
+    const { listReportItem } = reportState;
+
     let job = ((userDetail || {}).data || {}).profile_id;
     
     if([21,14,12].includes(job) == false) job = 12; // DEFAULT CSO
@@ -92,30 +99,28 @@ export const getStatusFloor = (userDetail, currentShift, schedulePattern, blocks
         const floors = blockPattern['pattern_' + i] || '';
         inactiveFloor += floors + ',';
     }
-    const inactiveIDX = inactiveFloor.split(',');
+    const floorSkippedIDX = inactiveFloor.split(',');
+    const checkZoneReport = listReportItem.filter(v => v.blocks == blocks && v.floor == floor);
+    const canAccess = floorSkippedIDX.includes(floor.toString()) || activeIDX.includes(floor.toString());
     
-    if(inactiveIDX.includes(floor.toString())) return 'inactive';
-    if(activeIDX.includes(floor.toString())) return 'active';
-    
+    if(checkZoneReport.length > 0 && checkZoneReport.length < 4 && canAccess) return 'on progress';
+    if(checkZoneReport.length == 4) return 'done';
+    if(canAccess) return 'active';
+
     return 'future';
 
 };
 
-const RenderRow = ({ navigation, floor, floorName, statusFloor, parentComponent }) => {
+const RenderRow = ({ block, tower, floor, statusFloor, parentComponent }) => {
+    const { state: reportState } = useContext(ReportContext);
+    const { listReportItem } = reportState;
+
     let bgFloor = '#ff9cf5';
     let bgZone = '#000';
 
-    if(statusFloor == 'inactive'){
-        // bgFloor = '#85a687'; 
-        // bgZone = '#85a687';
-        // bgFloor = '#19d425'; 
-        // bgZone = '#19d425';
-        bgFloor = '#ffd35c'; 
-        bgZone = '#ffd35c';
-    }else if(statusFloor == 'active'){
-        bgFloor = '#6598eb'; 
-        bgZone = '#6598eb';
-    }
+    if(statusFloor == 'active') {bgFloor = '#6598eb'; bgZone = '#6598eb';}
+    if(statusFloor == 'on progress') {bgFloor = '#dfe305'; bgZone = '#dfe305';}
+    if(statusFloor == 'done') {bgFloor = '#41db30'; bgZone = '#41db30';}
 
     let routeDetail;
     switch(parentComponent) {
@@ -129,10 +134,12 @@ const RenderRow = ({ navigation, floor, floorName, statusFloor, parentComponent 
     return (
         <View style={styles.trow}>
             <View style={[styles.items, { backgroundColor: `${bgFloor}` }]}><Text style={styles.textStyle}>{floor}</Text></View>
-            <TouchableOpacity style={[styles.items, { backgroundColor: `${bgZone}` }]}></TouchableOpacity >
-            <TouchableOpacity style={[styles.items, { backgroundColor: `${bgZone}` }]}></TouchableOpacity>
-            <TouchableOpacity style={[styles.items, { backgroundColor: `${bgZone}` }]}></TouchableOpacity>
-            <TouchableOpacity style={[styles.items, { backgroundColor: `${bgZone}` }]}></TouchableOpacity>
+            {[1,2,3,4].map((zone, key) => {
+                // const isDone = listReportItem.find(z => z.zone == zone && z.blocks == block && z.floor == floor && z.tower == tower);
+                // if(isDone) bgZone = '#41db30';
+                return <TouchableOpacity key={key} style={[styles.items, { backgroundColor: `${bgZone}` }]}></TouchableOpacity >
+                
+            })}
         </View>
     );
 }

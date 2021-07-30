@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { StyleSheet, Text, View, TouchableWithoutFeedback } from "react-native";
 import Animated, {
   useAnimatedRef,
@@ -15,6 +15,8 @@ import Checkmark from "./Checkmark";
 import * as ImagePicker from 'expo-image-picker';
 import * as BarcodeScanner from 'expo-barcode-scanner';
 import { useEffect } from "react";
+import { Context as ReportContext } from '../../context/ReportContext';
+import ContainerImagePicker from './ContainerImagePicker';
 
 export interface ListItem {
   name: string;
@@ -26,19 +28,16 @@ interface ListItemProps {
   isLast: boolean;
 }
 
-const ListChildItem = ({ navigation, item, isLast }) => {
-    const bottomRadius = isLast ? 8 : 0;
-    const checkmark = useSharedValue(false);
-    const checkmarkProgress = useDerivedValue(() => 
-        checkmark.value ? withSpring(1) : withTiming(0)
-    );
-    
-    const takeImageHandler = () => {
-        ImagePicker.launchCameraAsync();
-    };
+const ListChildItem = ({ navigation, category, problem, item, isLast }) => {
+    const { state, setCurrentScan } = useContext(ReportContext);
+    const { currentReportZone, currentReportScan, listReportScan } = state;
+    const dataScan = (listReportScan || []).find(v => v.category == category && v.problem == problem && v.item_name == item.name);
 
-    const takeScannerHandler = () => {
-      BarcodeScanner.requestPermissionsAsync();
+    const bottomRadius = isLast ? 8 : 0;
+
+    const onClickScan = (itemName) => {
+      setCurrentScan({ ...currentReportZone, category, problem, item_name: itemName })
+      navigation.navigate('ReportScanner')
     }
 
     return (
@@ -54,32 +53,19 @@ const ListChildItem = ({ navigation, item, isLast }) => {
           ]}
       >
           <Text style={styles.name}>{item.name}</Text>
-          <TouchableWithoutFeedback onPress={() => navigation.navigate('ReportScanner')}>
+          <TouchableWithoutFeedback onPress={() => onClickScan(item.name)}>
               <Animated.View style={{marginRight: 30, flexDirection: 'row', alignItems: 'center' }}>
                 {/* <Text style={{color: '#6e6e6e'}}>{'Scan '}</Text> */}
                 <Ionicons name="ios-scan-circle-sharp" style={{color: '#b8b8b8' }} size={30} ></Ionicons>
               </Animated.View>
           </TouchableWithoutFeedback>
       </View>
-      <BarcodeScanner.BarCodeScanner 
-        onBarCodeScanned={() => takeScannerHandler}
-      />
-      {/* <Animated.View style={[styles.detail]}>
-          <View style={styles.detailCol}>
-              <Text>{'Foto'}</Text>
-              <TouchableWithoutFeedback onPress={takeImageHandler}>
-                  <View style={styles.imagePicker}>
-                      <Ionicons name="ios-add-outline" style={{color: '#b8b8b8' }} size={50} ></Ionicons>
-                  </View>
-              </TouchableWithoutFeedback>
-          </View>
-          <View style={styles.detailCol}>
-              <Text>{'Qty'}</Text>
-          </View>
-          <View style={styles.detailCol}>
-              <Text>{'Status'}</Text>
-          </View>
-      </Animated.View> */}
+      {/* JIKA TIDAK ADA CHILD, MAKA LANGSUNG AMBIL FOTO AJA */}
+      {dataScan && dataScan.scan_item.length > 0 && 
+        dataScan.scan_item.map((code, key) => (
+          <ContainerImagePicker key={key} header={code}/>
+        ))
+      }
     </>);
 };
 
