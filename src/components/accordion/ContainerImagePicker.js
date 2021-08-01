@@ -1,16 +1,20 @@
 import React, { useState } from "react";
-import { StyleSheet, TouchableWithoutFeedback, View } from "react-native";
+import { Image, StyleSheet, TouchableWithoutFeedback, View } from "react-native";
 import { Text } from "react-native-elements";
 import Animated from "react-native-reanimated";
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
 const ContainerImagePicker = ({ header }) => {
-    const [selectedImage, setSelectedImage] = useState();
-    const takeImageHandler = () => {
-      ImagePicker.launchCameraAsync();
+    const [pickedImage, setPickedImage] = useState();
+    const takeImageHandler = async () => {
+      const image = await ImagePicker.launchCameraAsync({
+          aspect: [16, 9],
+          quality: 0.5
+      });
+      setPickedImage(image.uri);
     };
-  
+    console.log(pickedImage);
     return (<>
           {header && 
             <Text style={styles.header}>{header || ''}</Text>
@@ -19,11 +23,18 @@ const ContainerImagePicker = ({ header }) => {
               
               <View style={styles.detailCol}>
                   <Text>{'Foto'}</Text>
-                  <TouchableWithoutFeedback onPress={takeImageHandler}>
-                      <View style={styles.imagePicker}>
-                          <Ionicons name="ios-add-outline" style={{color: '#b8b8b8' }} size={50} ></Ionicons>
-                      </View>
-                  </TouchableWithoutFeedback>
+                  {pickedImage &&
+                    <View style={styles.imagePicker}>
+                        <Image style={{ width: 70, height: 70 }} source={{ uri: pickedImage }}></Image>
+                    </View>
+                  }
+                  {!pickedImage &&
+                    <TouchableWithoutFeedback onPress={takeImageHandler}>
+                        <View style={styles.imagePicker}>
+                            <Ionicons name="ios-add-outline" style={{color: '#b8b8b8' }} size={50} ></Ionicons>
+                        </View>
+                    </TouchableWithoutFeedback>
+                  }
               </View>
               <View style={styles.detailCol}>
                   <Text>{'Status'}</Text>

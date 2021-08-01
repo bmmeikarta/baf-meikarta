@@ -91,7 +91,7 @@ const ReportDetailScreen = ({ navigation }) => {
   // console.log('Scanned Item', listReportScan);
 
   const doSubmit = (navigation) => {
-    addReportItem(listReportItem, { ...currentReportZone, listReportScan });
+    addReportItem({ ...currentReportZone, listReportScan });
     navigation.navigate('Home')
   };
 

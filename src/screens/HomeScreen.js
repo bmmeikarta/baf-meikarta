@@ -46,7 +46,7 @@ const HomeScreen = ({ navigation }) => {
         <NavigationEvents 
             onWillFocus={async() => {
                 // await localToState();
-                await addReportItem(state.listReportItem, exampleData);
+                await addReportItem(exampleData);
                 await fetchLocalReportItem();
                 await fetchSchedule();
                 await fetchSchedulePattern();

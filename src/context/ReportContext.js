@@ -44,7 +44,7 @@ const getReportState = dispatch => async() => {
 
 const addReportItem = dispatch => async(data) => {
     try {
-        // await AsyncStorage.setItem('localReportItem', '[]');
+        // await AsyncStorage.removeItem('localReportItem');
         const localReportItem = JSON.parse(await AsyncStorage.getItem('localReportItem')) || [];
 
         const checkExisting = (localReportItem || []).find(v => 
@@ -55,25 +55,13 @@ const addReportItem = dispatch => async(data) => {
             const deletedLocalReportItem = localReportItem.filter(v => v != checkExisting);
             newReportItem = [ ...deletedLocalReportItem ];
         }
-
+        
         newReportItem = [ ...newReportItem, data ];
         await AsyncStorage.setItem('localReportItem', JSON.stringify(newReportItem));
 
         dispatch({ type: 'REPORT_SET_LIST_ITEM', payload: newReportItem });
     } catch (error) {
         console.log(error);
-        // Alert.alert(
-        //     'Oops..',
-        //     'Error',
-        //     [
-        //       {
-        //         text: 'No'
-        //       },
-        //       {
-        //         text: 'Yes',
-        //       },
-        //     ]
-        //   )
     }
 };
 
