@@ -4,18 +4,50 @@ import {Text, Button} from "react-native-elements";
 import { NavigationEvents, SafeAreaView } from "react-navigation";
 import { Context as ScheduleContext } from "../context/ScheduleContext";
 import { Context as ReportContext } from "../context/ReportContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const HomeScreen = ({ navigation }) => {
     const { fetchSchedule, fetchSchedulePattern, getCurrentShift } = useContext(ScheduleContext);
-    const { state, localToState, getReportState } = useContext(ReportContext);
+    const { state, localToState, getReportState, addReportItem } = useContext(ReportContext);
 
-    console.log('HOME ', state.listReportItem);
+    const exampleData = {
+        "blocks": "51022",
+        "floor": "1",
+        "listReportScan": [
+           {
+            "blocks": "51022",
+            "category": "Keamanan",
+            "floor": "1",
+            "item_name": "APAR",
+            "problem": "Object Hilang / Pencurian",
+            "scan_item": [
+              "https://tesss",
+              "https://tesss",
+            ],
+            "tower": "1B",
+            "zone": 1,
+          },
+        ],
+        "tower": "1B",
+        "zone": 1,
+      };
+
+    
+    
+    const fetchLocalReportItem = async() => {
+        const local = await AsyncStorage.getItem('localReportItem');
+
+        console.log('HOME ', state.listReportItem);
+        console.log('LOCAL ', local);
+    }
 
     return (
     <>
         <NavigationEvents 
             onWillFocus={async() => {
                 // await localToState();
+                await addReportItem(state.listReportItem, exampleData);
+                await fetchLocalReportItem();
                 await fetchSchedule();
                 await fetchSchedulePattern();
                 await getCurrentShift();

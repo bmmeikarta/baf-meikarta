@@ -86,12 +86,12 @@ const styles = StyleSheet.create({
 const ReportDetailScreen = ({ navigation }) => {
   const { state, getReportState, addReportItem } = useContext(ReportContext);
   const { headerTitle } = navigation.state.params;
-  const { currentReportZone, listReportScan } = state;
+  const { currentReportZone, listReportScan, listReportItem } = state;
 
   // console.log('Scanned Item', listReportScan);
 
   const doSubmit = (navigation) => {
-    addReportItem({ ...currentReportZone, listReportScan });
+    addReportItem(listReportItem, { ...currentReportZone, listReportScan });
     navigation.navigate('Home')
   };
 

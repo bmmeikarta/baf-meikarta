@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, TouchableWithoutFeedback, View } from "react-native";
 import { Text } from "react-native-elements";
 import Animated from "react-native-reanimated";
@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
 const ContainerImagePicker = ({ header }) => {
+    const [selectedImage, setSelectedImage] = useState();
     const takeImageHandler = () => {
       ImagePicker.launchCameraAsync();
     };

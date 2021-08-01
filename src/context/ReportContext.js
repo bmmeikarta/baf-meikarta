@@ -1,16 +1,24 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Alert } from "react-native";
 import createDataContext from "./createDataContext";
+import * as FileSystem from 'expo-file-system';
 
 const reportReducer = (state, action) => {
     switch (action.type) {
         case 'REPORT_SET_LIST_ITEM':
-            return { ...state, listReportItem: [...state.listReportItem, action.payload] }
+            return { ...state, listReportItem: action.payload }
         case 'REPORT_SET_LOCAL_LIST_ITEM':
             return { ...state, listReportItem: action.payload }
         case 'REPORT_SET_LIST_SCAN':
             return { ...state, listReportScan: [...state.listReportScan, action.payload] }
         case 'REPORT_RESET_LIST_SCAN':
             return { ...state, listReportScan: [] }
+        case 'REPORT_DELETE_REPORT_ITEM':
+            const listReportItem = state.listReportItem || [];
+            const deleteReportData = action.payload;
+
+            const newListReportItem = listReportItem.filter(v => v != deleteReportData);
+            return { ...state, listReportItem: newListReportItem }
         case 'REPORT_DELETE_SCAN_ITEM':
             const listReportScan = state.listReportScan || [];
             const deleteScanData = action.payload;
@@ -35,7 +43,38 @@ const getReportState = dispatch => async() => {
 };
 
 const addReportItem = dispatch => async(data) => {
-    dispatch({ type: 'REPORT_SET_LIST_ITEM', payload: data });
+    try {
+        // await AsyncStorage.setItem('localReportItem', '[]');
+        const localReportItem = JSON.parse(await AsyncStorage.getItem('localReportItem')) || [];
+
+        const checkExisting = (localReportItem || []).find(v => 
+            v.blocks == data.blocks && v.floor == data.floor && v.tower == data.tower && v.zone == data.zone);
+
+        let newReportItem = [];
+        if(checkExisting){
+            const deletedLocalReportItem = localReportItem.filter(v => v != checkExisting);
+            newReportItem = [ ...deletedLocalReportItem ];
+        }
+
+        newReportItem = [ ...newReportItem, data ];
+        await AsyncStorage.setItem('localReportItem', JSON.stringify(newReportItem));
+
+        dispatch({ type: 'REPORT_SET_LIST_ITEM', payload: newReportItem });
+    } catch (error) {
+        console.log(error);
+        // Alert.alert(
+        //     'Oops..',
+        //     'Error',
+        //     [
+        //       {
+        //         text: 'No'
+        //       },
+        //       {
+        //         text: 'Yes',
+        //       },
+        //     ]
+        //   )
+    }
 };
 
 const deleteScanItem = dispatch => async(data) => {
