@@ -14,7 +14,7 @@ const ContainerImagePicker = ({ header }) => {
       });
       setPickedImage(image.uri);
     };
-    console.log(pickedImage);
+    
     return (<>
           {header && 
             <Text style={styles.header}>{header || ''}</Text>

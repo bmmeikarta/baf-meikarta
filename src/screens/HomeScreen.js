@@ -8,7 +8,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const HomeScreen = ({ navigation }) => {
     const { fetchSchedule, fetchSchedulePattern, getCurrentShift } = useContext(ScheduleContext);
-    const { state, localToState, getReportState, addReportItem } = useContext(ReportContext);
+    const { state, localToState, getReportState, addReportItem, fetchAsset } = useContext(ReportContext);
+    const { loading, lastUpdateDB, listAsset } = state;
 
     const exampleData = {
         "blocks": "51022",
@@ -31,8 +32,6 @@ const HomeScreen = ({ navigation }) => {
         "tower": "1B",
         "zone": 1,
       };
-
-    
     
     const fetchLocalReportItem = async() => {
         const local = await AsyncStorage.getItem('localReportItem');
@@ -40,49 +39,61 @@ const HomeScreen = ({ navigation }) => {
         console.log('HOME ', state.listReportItem);
         console.log('LOCAL ', local);
     }
-
+    // console.log(listAsset.length);
     return (
     <>
         <NavigationEvents 
             onWillFocus={async() => {
                 // await localToState();
-                await addReportItem(exampleData);
-                await fetchLocalReportItem();
+                // await addReportItem(exampleData);
+                // await fetchLocalReportItem();
+                await fetchAsset();
                 await fetchSchedule();
                 await fetchSchedulePattern();
                 await getCurrentShift();
             }}
         />
-        <SafeAreaView style={styles.screen}>
-            <Button 
-                buttonStyle={styles.button}
-                title="SCHEDULE SEC / CSO / ENG" 
-                onPress={()=> navigation.navigate('ScheduleList')} 
-            />
-            <View style={styles.row}>
-                <View style={styles.container}>
-                    <Button 
-                        buttonStyle={[styles.buttonChild, { backgroundColor: '#eb8015' }]}
-                        title="COMPLAINT" 
-                        onPress={()=> navigation.navigate('ReportList')} 
-                    />
-                </View>
-                <View style={styles.container}>
-                    <Button 
-                        buttonStyle={[styles.buttonChild, { backgroundColor: '#0fbd32' }]}
-                        title="RESOLVE" 
-                        onPress={()=> navigation.navigate('ResolveList')} 
-                    />
-                </View>
-                <View style={styles.container}>
-                    <Button 
-                        buttonStyle={[styles.buttonChild, { backgroundColor: '#bd0f0f' }]}
-                        title="EMERGENCY" 
-                        onPress={()=> navigation.navigate('ReportList')} 
-                    />
-                </View>
+        {/* <SafeAreaView> */}
+            <View>
+                {loading && 
+                    <Text style={styles.status}>updating db...</Text>
+                }
+                {!loading && 
+                    <Text style={styles.status}>db last update: {lastUpdateDB}</Text>
+                }
             </View>
-        </SafeAreaView>
+            <SafeAreaView style={styles.screen}>
+                <Button 
+                    buttonStyle={styles.button}
+                    title="SCHEDULE SEC / CSO / ENG" 
+                    onPress={()=> navigation.navigate('ScheduleList')} 
+                />
+                <View style={styles.row}>
+                    <View style={styles.container}>
+                        <Button 
+                            buttonStyle={[styles.buttonChild, { backgroundColor: '#eb8015' }]}
+                            title="COMPLAINT" 
+                            onPress={()=> navigation.navigate('ReportList')} 
+                        />
+                    </View>
+                    <View style={styles.container}>
+                        <Button 
+                            buttonStyle={[styles.buttonChild, { backgroundColor: '#0fbd32' }]}
+                            title="RESOLVE" 
+                            onPress={()=> navigation.navigate('ResolveList')} 
+                        />
+                    </View>
+                    <View style={styles.container}>
+                        <Button 
+                            buttonStyle={[styles.buttonChild, { backgroundColor: '#bd0f0f' }]}
+                            title="EMERGENCY" 
+                            onPress={()=> navigation.navigate('ReportList')} 
+                        />
+                    </View>
+                </View>
+            </SafeAreaView>
+        {/* </SafeAreaView> */}
+        
     </>
     )
 };
@@ -115,6 +126,11 @@ const styles = StyleSheet.create({
         borderRadius: 4,
         height: 80,
     },
+    status:{
+        textAlign: "right",
+        fontSize: 11,
+        padding: 6
+    }
 });
 
 export default HomeScreen;

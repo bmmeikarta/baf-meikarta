@@ -8,9 +8,9 @@ const ReportZoneScreen = ({ navigation }) => {
     const { block_name, blocks, tower, floor } = navigation.state.params;
     const { currentReportZone } =  state;
 
-    const onChooseZone = (zone) => {
+    const onChooseZone = async (zone) => {
         const floorName = block_name + ' - ' + tower + ' - ' + floor + ' - Zone ' + zone;
-        setCurrentZone({blocks, tower, floor, zone});
+        await setCurrentZone({blocks, tower, floor, zone});
         navigation.navigate('ReportDetail', { headerTitle: `${floorName}` })
     };
     const checkZoneStored = () => {};

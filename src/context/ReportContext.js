@@ -2,9 +2,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
 import createDataContext from "./createDataContext";
 import * as FileSystem from 'expo-file-system';
+import easymoveinApi from "../api/easymovein";
+import moment from "moment";
 
 const reportReducer = (state, action) => {
     switch (action.type) {
+        case 'REPORT_SET_LOADING':
+            return { ...state, loading: action.payload };
+        case 'REPORT_FETCH_ASSET':
+            return { ...state, listAsset: action.payload, lastUpdateDB: moment().format('YYYY-MM-DD HH:mm:ss'), loading: false };
         case 'REPORT_SET_LIST_ITEM':
             return { ...state, listReportItem: action.payload }
         case 'REPORT_SET_LOCAL_LIST_ITEM':
@@ -29,6 +35,8 @@ const reportReducer = (state, action) => {
             return { ...state, currentReportZone: action.payload }
         case 'REPORT_SET_CURRENT_SCAN':
             return { ...state, currentReportScan: action.payload }
+        case 'REPORT_SET_CURRENT_ASSET':
+            return { ...state, currentReportAsset: action.payload }
         default:
             return state;
     }
@@ -79,7 +87,15 @@ const addScanItem = dispatch => async(listReportScan, data) => {
 };
 
 const setCurrentZone = dispatch => async(data) => {
-    dispatch({ type: 'REPORT_SET_CURRENT_ZONE', payload: data });
+    try {
+        const localAsset = JSON.parse(await AsyncStorage.getItem('localAssetItem')) || [];
+        const filterAsset = localAsset.filter(v => v.blocks == data.blocks && v.tower == data.tower && v.floor == data.floor && v.zone == data.zone);
+        
+        dispatch({ type: 'REPORT_SET_CURRENT_ASSET', payload: filterAsset });
+        dispatch({ type: 'REPORT_SET_CURRENT_ZONE', payload: data });
+    } catch (error) {
+        // console.log(error);
+    }
 };
 
 const setCurrentScan = dispatch => async(data) => {
@@ -88,6 +104,21 @@ const setCurrentScan = dispatch => async(data) => {
 
 const resetReportScan = dispatch => async(data) => {
     dispatch({ type: 'REPORT_RESET_LIST_SCAN' });
+};
+
+const fetchAsset = dispatch => async () => {
+    try {
+        dispatch({ type: 'REPORT_SET_LOADING', payload: true });
+        const response = await easymoveinApi.get('/get_asset.php');
+        const data = response.data || [];
+        const bafAsset = data.baf_asset || [];
+
+        await AsyncStorage.setItem('localAssetItem', JSON.stringify(bafAsset));
+
+        dispatch({ type: 'REPORT_FETCH_ASSET', payload: bafAsset });
+    } catch (error) {
+        processError(error);
+    }
 };
 
 const defaultList = {
@@ -114,8 +145,8 @@ const defaultList = {
 
 export const { Provider, Context} = createDataContext(
     reportReducer,
-    { getReportState, addReportItem, addScanItem, setCurrentZone, setCurrentScan, resetReportScan, deleteScanItem, localToState },
+    { fetchAsset, getReportState, addReportItem, addScanItem, setCurrentZone, setCurrentScan, resetReportScan, deleteScanItem, localToState },
 
     // default state reduce
-    { listReportItem: [], listReportScan: [], currentReportZone: {}, currentReportScan: {} }
+    { loading: false, listAsset: [], listReportItem: [], listReportScan: [], currentReportAsset:[], currentReportZone: {}, currentReportScan: {} }
 )

@@ -86,9 +86,9 @@ const styles = StyleSheet.create({
 const ReportDetailScreen = ({ navigation }) => {
   const { state, getReportState, addReportItem } = useContext(ReportContext);
   const { headerTitle } = navigation.state.params;
-  const { currentReportZone, listReportScan, listReportItem } = state;
+  const { currentReportZone, currentReportAsset, listReportScan, listReportItem } = state;
 
-  // console.log('Scanned Item', listReportScan);
+  // console.log('Asset Item', currentReportAsset);
 
   const doSubmit = (navigation) => {
     addReportItem({ ...currentReportZone, listReportScan });

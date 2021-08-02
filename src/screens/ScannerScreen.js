@@ -8,7 +8,7 @@ import { Context as ReportContext } from '../context/ReportContext';
 
 const ScannerScreen = ({ navigation }) => {
     const { state, addScanItem } = useContext(ReportContext);
-    const { currentReportScan, listReportScan } = state;
+    const { currentReportScan, currentReportAsset, listReportScan } = state;
     const dataScan = (listReportScan || []).find(v => v.category == currentReportScan.category && v.problem == currentReportScan.problem && v.item_name == currentReportScan.item_name) || {};
 
     const [hasPermission, setHasPermission] = useState(null);
@@ -35,10 +35,22 @@ const ScannerScreen = ({ navigation }) => {
     askForCameraPermission();
   }, []);
 
+  const alertError = (msg) =>{
+    Alert.alert(
+      'Oopss..',
+      msg,
+      [ { text: 'Ok' } ]
+    )
+  }
   // What happens when we scan the bar code
   const handleBarCodeScanned = ({ type, data }) => {
     setScanned(true);
-    
+    const checkAsset = currentReportAsset.filter(v => v.qrcode == data);
+    if(checkAsset.length == 0) return alertError('Asset not found for this zone');
+
+    const checkItemName = checkAsset.find(v => v.remark.toLowerCase() == currentReportScan.item_name.toLowerCase())
+    if(!checkItemName) return alertError('Scanned item not match with category');
+
     Alert.alert(
       'Scanned Item !',
       data + '\n\nAre you sure want to process this asset ?',
