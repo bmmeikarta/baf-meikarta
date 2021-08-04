@@ -28,7 +28,7 @@ const mapWorkHour = [
         work_hour: [
             {
                 shift: 1,
-                start: 8,
+                start: 7,
                 end: 15
             },
             {
@@ -139,7 +139,7 @@ const getCurrentShift = dispatch => async (x) => {
     if([21,14,12].includes(job) == false) job = 12; // DEFAULT CSO 
 
     if(!shift){
-        if(hourNow >= 8 && hourNow < 15) shift = 1;
+        if(hourNow >= 7 && hourNow < 15) shift = 1;
         if(hourNow >= 15 && hourNow < 22) shift = 2;
         if(hourNow >= 22 || hourNow < 5) shift = 3;
     }

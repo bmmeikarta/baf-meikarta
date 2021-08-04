@@ -4,15 +4,52 @@ import { Text } from "react-native-elements";
 import Animated from "react-native-reanimated";
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
+
 
 const ContainerImagePicker = ({ header }) => {
     const [pickedImage, setPickedImage] = useState();
     const takeImageHandler = async () => {
-      const image = await ImagePicker.launchCameraAsync({
-          aspect: [16, 9],
-          quality: 0.5
-      });
-      setPickedImage(image.uri);
+        const image = await ImagePicker.launchCameraAsync({
+            aspect: [16, 9],
+            quality: 0.5
+        });
+
+        const permission = await MediaLibrary.requestPermissionsAsync();
+        if (permission.granted) {
+            try {
+                const asset = await MediaLibrary.createAssetAsync(image.uri);
+                MediaLibrary.createAlbumAsync('BAF Meikarta', asset, true)
+                .then((res) => {
+                    console.log('File Saved Successfully!');
+                    console.log(res);
+                    // setPickedImage(asset.uri);
+                })
+                .catch(() => {
+                    console.log('Error In Saving File!');
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        } else {
+            console.log('Need Storage permission to save file');
+        }
+
+    //   const fileName = image.uri.split('/').pop();
+    //   const newPath = FileSystem.documentDirectory + fileName;
+    //   try {
+    //       await FileSystem.moveAsync({
+    //           from: image.uri,
+    //           to: newPath
+    //       });
+    //       setPickedImage(newPath);
+    //       console.log('MASOK', image)
+    //       console.log('MASOK', fileName, newPath)
+    //   } catch (error) {
+    //       console.log(error);
+    //       throw error;
+    //   }
     };
     
     return (<>

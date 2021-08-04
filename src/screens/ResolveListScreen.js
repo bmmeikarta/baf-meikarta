@@ -1,21 +1,98 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import Accordion from "../components/accordion/Accordion";
+import React, { useContext } from "react";
+import { StyleSheet, Text, View, ScrollView } from "react-native";
+import { Button } from "react-native-elements";
+import { Timer, getStatusFloor } from "./ScheduleListScreen";
+import { NavigationEvents } from "react-navigation";
+import { Context as ScheduleContext } from '../context/ScheduleContext';
+import { Context as AuthContext } from '../context/AuthContext';
+import { Context as ReportContext } from '../context/ReportContext';
 
-const ResolveListScreen = props => {
-    return (
-        <View style={styles.screen}>
-            <Text>Resolve Screen !</Text>
+const ReportListScreen = ({ navigation }) => {
+  const { state: authState } = useContext(AuthContext);
+  const { state: reportState, resetReportScan } = useContext(ReportContext);
+  const { state, fetchSchedule, fetchSchedulePattern, getCurrentShift, getActiveFloor } = useContext(ScheduleContext);
+  const { master_unit, activeFloor, currentShift, schedulePattern } = state;
+  const { userDetail } = authState;
+  const dataUnit = (master_unit || []);
+
+  // console.log('REPORT LIST ', reportState);
+  return (
+    <>
+      <NavigationEvents 
+        onWillFocus={async() => {
+          await resetReportScan();
+          await fetchSchedule();
+          await fetchSchedulePattern();
+          await getCurrentShift();
+          await getActiveFloor(currentShift, schedulePattern, '51022');
+        }}
+      />
+      <ScrollView style={styles.screen}>
+        {/* <Timer getCurrentShift={getCurrentShift}></Timer> */}
+        { dataUnit.length == 0 &&
+            <Text style={styles.textBlockName}>loading..</Text>
+        }
+        { dataUnit.length > 0 &&
+            <Text style={styles.textBlockName}>{dataUnit[0].block_name} - {dataUnit[0].tower}</Text>
+        }
+        <View style={styles.row}>
+
+          {dataUnit.map((v, key) => {
+
+            const statusFloor = getStatusFloor(userDetail, currentShift, schedulePattern, v.blocks, v.floor);
+
+            let bgFloor = '#000';
+            if(statusFloor == 'active') bgFloor = '#6598eb';
+            if(statusFloor == 'on progress') bgFloor = '#bd0f0f';
+            if(statusFloor == 'done') bgFloor = '#41db30';
+
+            const canAccess = statusFloor == 'active' || statusFloor == 'on progress';
+            
+            return <View key={key} style={styles.container}>
+              <Button 
+                buttonStyle={{ backgroundColor: `${bgFloor}` }}
+                onPress={() => canAccess ? navigation.navigate('ReportZone', { ...v }) : null}
+                title={v.floor}
+              />
+            </View>
+          })}
+
         </View>
-    )
+      </ScrollView>
+      {/* <ScheduleListScreen 
+        navigation={navigation} 
+        parentComponent={'ReportList'} 
+        showActiveOnly={true} 
+      /> */}
+    </>
+  );
 };
 
 const styles = StyleSheet.create({
-    screen: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
-    }
-});
+  screen: {
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+  },
+  row: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "flex-start",
+    paddingVertical: 10
+  },
+  button: {
+    height: 50,
+    alignSelf: "center",
+  },
+  container: {
+    width: '33%',
+    padding: 2
+  },
+  textBlockName: {
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: 22,
+    marginBottom: 10
+  },
+})
 
-export default ResolveListScreen;
+export default ReportListScreen;

@@ -117,7 +117,8 @@ const fetchAsset = dispatch => async () => {
 
         dispatch({ type: 'REPORT_FETCH_ASSET', payload: bafAsset });
     } catch (error) {
-        processError(error);
+        console.log(error);
+        // processError(error);
     }
 };
 
