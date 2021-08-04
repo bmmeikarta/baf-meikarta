@@ -5,6 +5,7 @@ import { NavigationEvents, SafeAreaView } from "react-navigation";
 import { Context as ScheduleContext } from "../context/ScheduleContext";
 import { Context as ReportContext } from "../context/ReportContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import moment from "moment";
 
 const HomeScreen = ({ navigation }) => {
     const { fetchSchedule, fetchSchedulePattern, getCurrentShift } = useContext(ScheduleContext);
@@ -29,11 +30,22 @@ const HomeScreen = ({ navigation }) => {
             "zone": 1,
           },
         ],
+        "listReportUpload": [
+            {
+                "category": "Keamanan",
+                "item_name": "APAR",
+                "id_asset": 6404,
+                "problem": "Object Hilang / Pencurian",
+                "created_at": moment().format('YYYY-MM-DD HH:mm:ss'),
+                "photo_before": "tess"
+            },
+        ],
         "tower": "1B",
         "zone": 1,
       };
     
     const fetchLocalReportItem = async() => {
+        // await AsyncStorage.removeItem('localReportItem');
         const local = await AsyncStorage.getItem('localReportItem');
 
         console.log('HOME ', state.listReportItem);
@@ -44,9 +56,9 @@ const HomeScreen = ({ navigation }) => {
     <>
         <NavigationEvents 
             onWillFocus={async() => {
-                // await localToState();
+                await localToState();
                 // await addReportItem(exampleData);
-                // await fetchLocalReportItem();
+                await fetchLocalReportItem();
                 await fetchAsset();
                 await fetchSchedule();
                 await fetchSchedulePattern();

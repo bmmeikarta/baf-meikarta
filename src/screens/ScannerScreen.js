@@ -53,7 +53,7 @@ const ScannerScreen = ({ navigation }) => {
 
     Alert.alert(
       'Scanned Item !',
-      data + '\n\nAre you sure want to process this asset ?',
+      checkItemName.qrcode + '\n\nAre you sure want to process this asset ?',
       [
         {
           text: 'No'
@@ -61,8 +61,7 @@ const ScannerScreen = ({ navigation }) => {
         {
           text: 'Yes',
           onPress: () => {
-            // addReportItem([...listItem, data]);
-            setListItem([...listItem, data]);
+            setListItem([...listItem, { qrcode: checkItemName.qrcode, id_asset: checkItemName.id }]);
           }
         },
       ]
@@ -72,7 +71,7 @@ const ScannerScreen = ({ navigation }) => {
   const handleDeleteItem = (key) => {
     Alert.alert(
       'Remove Item',
-      listItem[key] + '\n\nAre you sure want to remove this asset from list ?',
+      listItem[key].qrcode + '\n\nAre you sure want to remove this asset from list ?',
       [
         {
           text: 'No'
@@ -101,8 +100,7 @@ const ScannerScreen = ({ navigation }) => {
         {
           text: 'Yes',
           onPress: () => {
-            // addReportItem([...listItem, data]);
-            addScanItem((listReportScan || []), { ...currentReportScan, scan_item: [ ...listItem ] });
+            addScanItem((listReportScan || []), { ...currentReportScan, scan_item: listItem });
             navigation.goBack();
           }
         },
@@ -141,7 +139,7 @@ const ScannerScreen = ({ navigation }) => {
     <ScrollView style={{paddingHorizontal: 20, height: 90}}>
       {listItem.map( (item, key) => (
         <View key={key} style={styles.card}>
-          <Text>{item}</Text>
+          <Text>{item.qrcode}</Text>
           <TouchableWithoutFeedback
             onPress={() => handleDeleteItem(key)}
           >

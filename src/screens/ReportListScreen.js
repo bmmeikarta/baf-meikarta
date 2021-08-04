@@ -20,7 +20,6 @@ const ReportListScreen = ({ navigation }) => {
     <>
       <NavigationEvents 
         onWillFocus={async() => {
-          await resetReportScan();
           await fetchSchedule();
           await fetchSchedulePattern();
           await getCurrentShift();

@@ -86,18 +86,18 @@ const styles = StyleSheet.create({
 const ReportDetailScreen = ({ navigation }) => {
   const { state, getReportState, addReportItem } = useContext(ReportContext);
   const { headerTitle } = navigation.state.params;
-  const { currentReportZone, currentReportAsset, listReportScan, listReportItem } = state;
+  const { currentReportZone, currentReportAsset, listReportScan, listReportUpload } = state;
 
   // console.log('Asset Item', currentReportAsset);
 
   const doSubmit = (navigation) => {
-    addReportItem({ ...currentReportZone, listReportScan });
+    // console.log({ ...currentReportZone, listReportUpload });
+    addReportItem({ ...currentReportZone, listReportUpload });
     navigation.navigate('Home')
   };
 
   return (<>
       <NavigationEvents 
-        on
         onWillFocus={async() => {
           await getReportState();
         }}

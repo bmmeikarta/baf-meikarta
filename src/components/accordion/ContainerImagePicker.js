@@ -1,39 +1,59 @@
-import React, { useState } from "react";
-import { Image, StyleSheet, TouchableWithoutFeedback, View } from "react-native";
+import React, { useContext, useState } from "react";
+import { Alert, Image, StyleSheet, TouchableWithoutFeedback, View } from "react-native";
 import { Text } from "react-native-elements";
 import Animated from "react-native-reanimated";
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
+import { Context as ReportContext } from '../../context/ReportContext';
 
+const ContainerImagePicker = ({category, problem, idAsset, assetQR }) => {
+    const { state, addUploadItem } = useContext(ReportContext);
+    const { listReportUpload } = state;
 
-const ContainerImagePicker = ({ header }) => {
     const [pickedImage, setPickedImage] = useState();
-    const takeImageHandler = async () => {
-        const image = await ImagePicker.launchCameraAsync({
-            aspect: [16, 9],
-            quality: 0.5
-        });
+    const [uploadItem, setUploadItem] = useState({
+        category: category,
+        problem,
+        id_asset: idAsset,
+        qrcode: assetQR
+    });
+    
+    const afterTakingImage = (data) => {
+        addUploadItem(data);
+        // addReportItem({ ...currentReportZone, data });
+      }
 
-        const permission = await MediaLibrary.requestPermissionsAsync();
-        if (permission.granted) {
-            try {
-                const asset = await MediaLibrary.createAssetAsync(image.uri);
-                MediaLibrary.createAlbumAsync('BAF Meikarta', asset, true)
-                .then((res) => {
-                    console.log('File Saved Successfully!');
-                    console.log(res);
-                    // setPickedImage(asset.uri);
-                })
-                .catch(() => {
-                    console.log('Error In Saving File!');
-                });
-            } catch (error) {
-                console.log(error);
-            }
-        } else {
-            console.log('Need Storage permission to save file');
+    const takeImageHandler = async () => {
+        try {
+            const image = await ImagePicker.launchCameraAsync({
+                aspect: [16, 9],
+                quality: 0.5
+            });
+
+            if(image.cancelled) return;
+
+            const permission = await MediaLibrary.requestPermissionsAsync();
+            if (!permission.granted) throw 'Need Storage permission to save file';
+
+            const asset = await MediaLibrary.createAssetAsync(image.uri);
+            MediaLibrary.createAlbumAsync('BAF Meikarta', asset, true)
+            .then((res) => {
+                console.log('File Saved Successfully!');
+                afterTakingImage({ ...uploadItem, photo_before: asset.uri });
+                setPickedImage(asset.uri);
+            })
+            .catch((error) => {
+                console.log('Error In Saving File!', error);
+            });
+        } catch (error) {
+            console.log(error);
+            Alert.alert(
+                'Oopss..',
+                error,
+                [ { text: 'Ok' } ]
+            )
         }
 
     //   const fileName = image.uri.split('/').pop();
@@ -53,8 +73,8 @@ const ContainerImagePicker = ({ header }) => {
     };
     
     return (<>
-          {header && 
-            <Text style={styles.header}>{header || ''}</Text>
+          {assetQR && 
+            <Text style={styles.header}>{assetQR || ''}</Text>
           }
           <Animated.View style={[styles.detail]}>
               

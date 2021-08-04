@@ -69,19 +69,19 @@ const ListItem = ({ navigation, category, question, isLast }) => {
     borderBottomRightRadius: checkmarkProgress.value === 0 ? 8 : 0,
   }));
   const style = useAnimatedStyle(() => ({
-    height: height.value * checkmarkProgress.value + 1,
-    opacity: checkmarkProgress.value === 0 ? 0 : 1,
+    // height: height.value * checkmarkProgress.value + 1,
+    // opacity: checkmarkProgress.value === 0 ? 0 : 1,
+    display: checkmarkProgress.value === 0 ? 'none':'flex',
   }));
 
   return (<>
       <TouchableWithoutFeedback
         onPress={() => {
-          if (height.value === 0) {
-            runOnUI(() => {
-              "worklet";
-              height.value = measure(aref).height;
-            })();
-          }
+          // runOnUI(() => {
+          //   "worklet";
+          //   height.value = measure(aref).height;
+          // })();
+          
           checkmark.value = !checkmark.value;
         }}
       >
@@ -113,7 +113,7 @@ const ListItem = ({ navigation, category, question, isLast }) => {
 
       {/* JIKA TIDAK ADA CHILD, MAKA LANGSUNG AMBIL FOTO AJA */}
       {question.items.length == 0 && 
-        <ContainerImagePicker header={null}/>
+        <ContainerImagePicker assetQR={null} idAsset={null} category={category} problem={question.label}/>
       }
 
       {/* JIKA ADA CHILD, TAMPILKAN ITEM UNTUK DI SCAN */}

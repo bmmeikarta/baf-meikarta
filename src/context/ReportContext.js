@@ -17,8 +17,14 @@ const reportReducer = (state, action) => {
             return { ...state, listReportItem: action.payload }
         case 'REPORT_SET_LIST_SCAN':
             return { ...state, listReportScan: [...state.listReportScan, action.payload] }
+        case 'REPORT_SET_LIST_UPLOAD':
+            return { ...state, listReportUpload: [...state.listReportUpload, action.payload] }
         case 'REPORT_RESET_LIST_SCAN':
             return { ...state, listReportScan: [] }
+        case 'REPORT_RESET_LIST_UPLOAD':
+            return { ...state, listReportUpload: [] }
+        case 'REPORT_RESET_ALL_TEMP_LIST':
+            return { ...state, listReportScan: [], listReportUpload: [] }
         case 'REPORT_DELETE_REPORT_ITEM':
             const listReportItem = state.listReportItem || [];
             const deleteReportData = action.payload;
@@ -43,7 +49,7 @@ const reportReducer = (state, action) => {
 };
 
 const localToState = dispatch => async() => {
-    const localReportItem = await AsyncStorage.getItem('listReportItem') || [];
+    const localReportItem = JSON.parse(await AsyncStorage.getItem('localReportItem')) || [];
     dispatch({ type: 'REPORT_SET_LOCAL_LIST_ITEM', payload: localReportItem });
 }
 const getReportState = dispatch => async() => {
@@ -58,7 +64,7 @@ const addReportItem = dispatch => async(data) => {
         const checkExisting = (localReportItem || []).find(v => 
             v.blocks == data.blocks && v.floor == data.floor && v.tower == data.tower && v.zone == data.zone);
 
-        let newReportItem = [];
+        let newReportItem = localReportItem;
         if(checkExisting){
             const deletedLocalReportItem = localReportItem.filter(v => v != checkExisting);
             newReportItem = [ ...deletedLocalReportItem ];
@@ -86,6 +92,10 @@ const addScanItem = dispatch => async(listReportScan, data) => {
     dispatch({ type: 'REPORT_SET_LIST_SCAN', payload: data });
 };
 
+const addUploadItem = dispatch => async(data) => {
+    dispatch({ type: 'REPORT_SET_LIST_UPLOAD', payload: data });
+};
+
 const setCurrentZone = dispatch => async(data) => {
     try {
         const localAsset = JSON.parse(await AsyncStorage.getItem('localAssetItem')) || [];
@@ -104,6 +114,10 @@ const setCurrentScan = dispatch => async(data) => {
 
 const resetReportScan = dispatch => async(data) => {
     dispatch({ type: 'REPORT_RESET_LIST_SCAN' });
+};
+
+const resetReportTemp = dispatch => async(data) => {
+    dispatch({ type: 'REPORT_RESET_ALL_TEMP_LIST' });
 };
 
 const fetchAsset = dispatch => async () => {
@@ -146,8 +160,8 @@ const defaultList = {
 
 export const { Provider, Context} = createDataContext(
     reportReducer,
-    { fetchAsset, getReportState, addReportItem, addScanItem, setCurrentZone, setCurrentScan, resetReportScan, deleteScanItem, localToState },
+    { fetchAsset, getReportState, addReportItem, addScanItem, addUploadItem, setCurrentZone, setCurrentScan, resetReportScan, resetReportTemp, deleteScanItem, localToState },
 
     // default state reduce
-    { loading: false, listAsset: [], listReportItem: [], listReportScan: [], currentReportAsset:[], currentReportZone: {}, currentReportScan: {} }
+    { loading: false, listAsset: [], listReportItem: [], listReportUpload: [], listReportScan: [], currentReportAsset:[], currentReportZone: {}, currentReportScan: {} }
 )

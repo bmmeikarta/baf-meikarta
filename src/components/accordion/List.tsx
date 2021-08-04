@@ -27,9 +27,6 @@ interface ListProps {
 }
 
 const List = ({ navigation, list }) => {
-  const { state } = useContext(ReportContext);
-  const { currentReportZone, listReportItem } = state;
-
   const aref = useAnimatedRef<View>();
   const arefChild = useAnimatedRef<View>();
   const open = useSharedValue(false);
@@ -53,6 +50,7 @@ const List = ({ navigation, list }) => {
     display: progress.value === 0 ? 'none':'flex',
     // opacity: progress.value === 0 ? 0 : 1,
   }));
+
   return (
     <>
         <Animated.View style={[styles.container, headerStyle]}>
@@ -74,12 +72,11 @@ const List = ({ navigation, list }) => {
 
             <TouchableWithoutFeedback
               onPress={() => {
-                if (height.value === 0) {
-                  runOnUI(() => {
-                    "worklet";
-                    height.value = measure(aref).height;
-                  })();
-                }
+                runOnUI(() => {
+                  "worklet";
+                  height.value = measure(aref).height;
+                })();
+                
                 open.value = !open.value;
                 checkmark.value = false;
               }}
@@ -102,7 +99,7 @@ const List = ({ navigation, list }) => {
 
           {/* JIKA TIDAK ADA CHILD, MAKA LANGSUNG AMBIL FOTO AJA */}
           {list.questions.length == 0 && 
-            <ContainerImagePicker header={null}/>
+            <ContainerImagePicker assetQR={null} idAsset={null} category={list.title} problem={null}/>
           }
 
           {/* JIKA ADA CHILD, TAMPILKAN ITEM UNTUK DI SCAN */}

@@ -1,10 +1,11 @@
 import React, { useContext } from "react";
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
 import Svg, { Rect } from "react-native-svg";
+import { NavigationEvents } from "react-navigation";
 import { Context as ReportContext } from '../context/ReportContext';
 
 const ReportZoneScreen = ({ navigation }) => {
-    const { state, setCurrentZone } = useContext(ReportContext);
+    const { state, setCurrentZone, resetReportTemp } = useContext(ReportContext);
     const { block_name, blocks, tower, floor } = navigation.state.params;
     const { currentReportZone } =  state;
 
@@ -15,7 +16,12 @@ const ReportZoneScreen = ({ navigation }) => {
     };
     const checkZoneStored = () => {};
 
-    return (
+    return (<>
+        <NavigationEvents 
+            onWillFocus={async() => {
+                await resetReportTemp();
+            }}
+        />
         <View style={styles.screen}>
             <Text style={styles.textBlockName}>{block_name} - {tower} - {floor}</Text>
             <View style={styles.zoneOption}>
@@ -79,7 +85,7 @@ const ReportZoneScreen = ({ navigation }) => {
                 </TouchableOpacity>
             </View>
         </View>
-    )
+    </>)
 }
 
 const styles = StyleSheet.create({
