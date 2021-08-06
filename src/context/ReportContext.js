@@ -4,9 +4,12 @@ import createDataContext from "./createDataContext";
 import * as FileSystem from 'expo-file-system';
 import easymoveinApi from "../api/easymovein";
 import moment from "moment";
+import jwtDecode from "jwt-decode";
 
 const reportReducer = (state, action) => {
     switch (action.type) {
+        case 'REPORT_SET_TEST':
+            return { ...state, testVal: action.payload };
         case 'REPORT_SET_LOADING':
             return { ...state, loading: action.payload };
         case 'REPORT_FETCH_ASSET':
@@ -59,6 +62,24 @@ const getReportState = dispatch => async() => {
 const addReportItem = dispatch => async(data) => {
     try {
         // await AsyncStorage.removeItem('localReportItem');
+        const token = await AsyncStorage.getItem('token');
+        const userDetail = jwtDecode(token);
+        let shift = userDetail.data.shift;
+        const id_user = userDetail.data.id_user;
+
+        //BYPASS ADMIN, DELETE LATER
+        const hourNow = moment().format('H');
+        if(!shift){
+            if(hourNow >= 7 && hourNow < 15) shift = 1;
+            if(hourNow >= 15 && hourNow < 22) shift = 2;
+            if(hourNow >= 22 || hourNow < 5) shift = 3;
+        }
+        // =============================================
+
+        data.shift_id = shift;
+        data.created_by = id_user;
+        data.created_at = moment().format('YYYY-MM-DD HH:mm:ss');
+
         const localReportItem = JSON.parse(await AsyncStorage.getItem('localReportItem')) || [];
 
         const checkExisting = (localReportItem || []).find(v => 
@@ -136,6 +157,45 @@ const fetchAsset = dispatch => async () => {
     }
 };
 
+const doPostReport = dispatch => async (val) => {
+    try {
+        const localReportItem = JSON.parse(await AsyncStorage.getItem('localReportItem')) || [];
+
+        const reqPost = await localReportItem.map( async v => {
+            const listReportUpload = v.listReportUpload || [];
+            await listReportUpload.map(async u => {
+                const photo = u.photo_before || '';
+                const photoName = photo.split('/').pop();
+                const image= "data:image/jpeg;base64," + (Platform.OS === 'ios' ? photo.replace('file://', '') : photo);
+                const base64 = await FileSystem.readAsStringAsync(photo, { encoding: 'base64' });
+
+                const uploadData = {
+                    data: { ...v, ...u, listReportUpload: [] },
+                    photo: base64
+                }
+                // formData.append('photo', image);
+
+                const response = await easymoveinApi.post('/post_report.php', JSON.stringify(uploadData));
+
+                console.log('================');
+                console.log(response.data);
+            });
+        })
+        // console.log('do Post Report', val);
+        // dispatch({ type: 'REPORT_SET_LOADING', payload: true });
+        // const response = await easymoveinApi.get('/get_asset.php');
+        // const data = response.data || [];
+        // const bafAsset = data.baf_asset || [];
+
+        // await AsyncStorage.setItem('localAssetItem', JSON.stringify(bafAsset));
+
+        // dispatch({ type: 'REPORT_FETCH_ASSET', payload: bafAsset });
+    } catch (error) {
+        console.log(error);
+        // processError(error);
+    }
+};
+
 const defaultList = {
     "blocks": "51022",
     "floor": "1",
@@ -160,7 +220,7 @@ const defaultList = {
 
 export const { Provider, Context} = createDataContext(
     reportReducer,
-    { fetchAsset, getReportState, addReportItem, addScanItem, addUploadItem, setCurrentZone, setCurrentScan, resetReportScan, resetReportTemp, deleteScanItem, localToState },
+    { doPostReport, fetchAsset, getReportState, addReportItem, addScanItem, addUploadItem, setCurrentZone, setCurrentScan, resetReportScan, resetReportTemp, deleteScanItem, localToState },
 
     // default state reduce
     { loading: false, listAsset: [], listReportItem: [], listReportUpload: [], listReportScan: [], currentReportAsset:[], currentReportZone: {}, currentReportScan: {} }
