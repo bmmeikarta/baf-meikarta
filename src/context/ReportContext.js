@@ -81,7 +81,7 @@ const addReportItem = dispatch => async(data) => {
         data.created_at = moment().format('YYYY-MM-DD HH:mm:ss');
 
         const localReportItem = JSON.parse(await AsyncStorage.getItem('localReportItem')) || [];
-
+        
         const checkExisting = (localReportItem || []).find(v => 
             v.blocks == data.blocks && v.floor == data.floor && v.tower == data.tower && v.zone == data.zone);
 
@@ -90,6 +90,9 @@ const addReportItem = dispatch => async(data) => {
             const deletedLocalReportItem = localReportItem.filter(v => v != checkExisting);
             newReportItem = [ ...deletedLocalReportItem ];
         }
+        
+        // MERGE listReportUpload from local
+        data.listReportUpload = [ ...data.listReportUpload, ...checkExisting.listReportUpload ];
         
         newReportItem = [ ...newReportItem, data ];
         await AsyncStorage.setItem('localReportItem', JSON.stringify(newReportItem));

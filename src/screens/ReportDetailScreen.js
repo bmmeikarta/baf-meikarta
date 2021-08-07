@@ -5,6 +5,7 @@ import { NavigationEvents } from "react-navigation";
 import { Context as ReportContext } from '../context/ReportContext';
 
 import List, { List as ListModel } from "../components/accordion/List";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const listKebersihan = {
   title: "Kebersihan",
@@ -90,7 +91,8 @@ const ReportDetailScreen = ({ navigation }) => {
 
   // console.log('Asset Item', currentReportAsset);
 
-  const doSubmit = (navigation) => {
+  const doSubmit = async (navigation) => {
+    const localReportUpload = await AsyncStorage.getItem('localReportItem');
     // console.log({ ...currentReportZone, listReportUpload });
     addReportItem({ ...currentReportZone, listReportUpload });
     navigation.navigate('Home')
