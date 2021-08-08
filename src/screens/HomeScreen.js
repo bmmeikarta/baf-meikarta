@@ -11,9 +11,10 @@ import NetInfo from "@react-native-community/netinfo";
 
 const HomeScreen = ({ navigation }) => {
     const { fetchSchedule, fetchSchedulePattern, getCurrentShift } = useContext(ScheduleContext);
-    const { state, localToState, getReportState, addReportItem, fetchAsset, doPostReport } = useContext(ReportContext);
-    const { loading, lastUpdateDB, listAsset, testVal, listReportItem } = state;
-      
+    const { state, localToState, getReportState, addReportItem, fetchAsset, fetchComplaint, doPostReport, doPostResolve } = useContext(ReportContext);
+    const { loading, lastUpdateDB, listAsset, testVal, listReportItem, listReportResolve } = state;
+    
+    const countNotSync = listReportResolve.length + listReportItem.length;
     const exampleData = [{
         "blocks": "51022",
         "floor": "27",
@@ -48,16 +49,26 @@ const HomeScreen = ({ navigation }) => {
     const fetchLocalReportItem = async() => {
         // await AsyncStorage.removeItem('localReportItem');
         const local = await AsyncStorage.getItem('localReportItem');
+        const localResolvedReport = await AsyncStorage.getItem('localResolvedReport');
         // navigation.setParams({ localReport: state.listReportItem, doPostReport: doPostReport });
-        console.log('HOME ', state.listReportItem);
+        // console.log('HOME ', state.listReportItem);
         console.log('LOCAL ', JSON.parse(local));
+        console.log('RESOLVED ', JSON.parse(localResolvedReport));
     }
 
     const onSyncData = async () => {
         await NetInfo.fetch().then(async isConnected => {
             if (isConnected) {
                 await doPostReport();
+                await doPostResolve();
+                await fetchComplaint();
+                await localToState();
+                await fetchLocalReportItem();
+                // await addReportItem(exampleData[0]);
                 await fetchAsset();
+                await fetchSchedule();
+                await fetchSchedulePattern();
+                await getCurrentShift();
             } else {
                 Alert.alert("Oopss..", "Sorry you're offline");
             }
@@ -69,13 +80,7 @@ const HomeScreen = ({ navigation }) => {
     <>
         <NavigationEvents 
             onWillFocus={async() => {
-                await localToState();
-                await fetchLocalReportItem();
-                // await addReportItem(exampleData[0]);
-                await fetchAsset();
-                await fetchSchedule();
-                await fetchSchedulePattern();
-                await getCurrentShift();
+                await onSyncData();
             }}
         />
         {/* <SafeAreaView> */}
@@ -90,7 +95,7 @@ const HomeScreen = ({ navigation }) => {
                     
                     <Button
                         buttonStyle={{ width: 90, alignSelf: "flex-end", backgroundColor: "purple"}}
-                        onPress={() => onSyncData()}
+                        onPress={() => !loading ? onSyncData() : null}
                         title="Sync"
                         color="#fff"
                         icon={
@@ -104,9 +109,9 @@ const HomeScreen = ({ navigation }) => {
                         iconPosition="left"
                         loading={loading}
                     />
-                    { (listReportItem || []).length > 0 &&
+                    { countNotSync > 0 &&
                         <Badge
-                            value={listReportItem.length}
+                            value={countNotSync}
                             status="error"
                             containerStyle={styles.badgeStyle} 
                         />
@@ -117,28 +122,28 @@ const HomeScreen = ({ navigation }) => {
                 <Button 
                     buttonStyle={styles.button}
                     title="SCHEDULE SEC / CSO / ENG" 
-                    onPress={()=> navigation.navigate('ScheduleList')} 
+                    onPress={()=> !loading ? navigation.navigate('ScheduleList') : null} 
                 />
                 <View style={styles.row}>
                     <View style={styles.container}>
                         <Button 
                             buttonStyle={[styles.buttonChild, { backgroundColor: '#eb8015' }]}
                             title="COMPLAINT" 
-                            onPress={()=> navigation.navigate('ReportList')} 
+                            onPress={()=> !loading ? navigation.navigate('ReportList') : null} 
                         />
                     </View>
                     <View style={styles.container}>
                         <Button 
                             buttonStyle={[styles.buttonChild, { backgroundColor: '#0fbd32' }]}
                             title="RESOLVE" 
-                            onPress={()=> navigation.navigate('ResolveList')} 
+                            onPress={()=> !loading ? navigation.navigate('ResolveList') : null} 
                         />
                     </View>
                     <View style={styles.container}>
                         <Button 
                             buttonStyle={[styles.buttonChild, { backgroundColor: '#bd0f0f' }]}
                             title="EMERGENCY" 
-                            onPress={()=> navigation.navigate('ReportList')} 
+                            onPress={()=> !loading ? navigation.navigate('ReportList') : null} 
                         />
                     </View>
                 </View>

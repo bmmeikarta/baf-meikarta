@@ -6,13 +6,16 @@ import { Context as ReportContext } from '../context/ReportContext';
 
 const ReportZoneScreen = ({ navigation }) => {
     const { state, setCurrentZone, resetReportTemp } = useContext(ReportContext);
-    const { block_name, blocks, tower, floor } = navigation.state.params;
+    const { block_name, blocks, tower, floor, parentScreen } = navigation.state.params;
     const { currentReportZone } =  state;
 
     const onChooseZone = async (zone) => {
         const floorName = block_name + ' - ' + tower + ' - ' + floor + ' - Zone ' + zone;
         await setCurrentZone({blocks, tower, floor, zone});
-        navigation.navigate('ReportDetail', { headerTitle: `${floorName}` })
+        // navigation.navigate('ReportDetail', { headerTitle: `${floorName}` });
+
+        navigation.navigate('ReportScannerZone', { headerTitle: `${floorName}`, zone, parentScreen });
+
     };
     const checkZoneStored = () => {};
 

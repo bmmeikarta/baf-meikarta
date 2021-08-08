@@ -20,6 +20,9 @@ import SigninScreen from "./src/screens/SigninScreen";
 import ResolveAuthScreen from './src/screens/ResolveAuthScreen';
 import { StyleSheet, Text } from 'react-native';
 import ScannerScreen from './src/screens/ScannerScreen';
+import ScannerScreenZone from './src/screens/ScannerScreenZone';
+import ResolveListTableScreen from './src/screens/ResolveListTableScreen';
+import ResolveFormScreen from './src/screens/ResolveFormScreen';
 
 const styles = StyleSheet.create({
   headerTitle: {
@@ -84,6 +87,12 @@ const switchNavigator = createSwitchNavigator({
             headerTitle: ()=><Text style={styles.headerTitle}>{'Choose Zone'}</Text>,
           }
         },
+        ReportScannerZone: {
+          screen: ScannerScreenZone,
+          navigationOptions: {
+            headerTitle: ()=><Text style={styles.headerTitle}>{'Checking Zone'}</Text>,
+          }
+        },
         ReportDetail: {
           screen: ReportDetailScreen,
           navigationOptions: {
@@ -107,7 +116,36 @@ const switchNavigator = createSwitchNavigator({
     // TAB RESOLVE
     resolveFlow: {
       screen: createStackNavigator({
-        ResolveList: ResolveListScreen,
+        ResolveList: {
+          screen: ResolveListScreen,
+          navigationOptions: {
+            headerTitle: ()=><Text style={styles.headerTitle}>{'Resolve'}</Text>,
+          }
+        },
+        ResolveZone: {
+          screen: ReportZoneScreen,
+          navigationOptions: {
+            headerTitle: ()=><Text style={styles.headerTitle}>{'Choose Zone'}</Text>,
+          }
+        },
+        ResolveScannerZone: {
+          screen: ScannerScreenZone,
+          navigationOptions: {
+            headerTitle: ()=><Text style={styles.headerTitle}>{'Checking Zone'}</Text>,
+          }
+        },
+        ResolveListTable: {
+          screen: ResolveListTableScreen,
+          navigationOptions: {
+            headerTitle: ()=><Text style={styles.headerTitle}>{'List Complaint'}</Text>,
+          }
+        },
+        ResolveForm: {
+          screen: ResolveFormScreen,
+          navigationOptions: {
+            headerTitle: ()=><Text style={styles.headerTitle}>{'Resolve Complaint'}</Text>,
+          }
+        },
       }),
       navigationOptions: {
         tabBarLabel: ()=>null,

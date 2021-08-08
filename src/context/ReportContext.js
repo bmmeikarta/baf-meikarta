@@ -14,10 +14,17 @@ const reportReducer = (state, action) => {
             return { ...state, loading: action.payload };
         case 'REPORT_FETCH_ASSET':
             return { ...state, listAsset: action.payload, lastUpdateDB: moment().format('YYYY-MM-DD HH:mm:ss'), loading: false };
+        case 'REPORT_FETCH_COMPLAINT':
+            return { ...state, listComplaint: action.payload, loading: false };
+
+        case 'REPORT_SET_LOCAL_LIST_ITEM':
         case 'REPORT_SET_LIST_ITEM':
             return { ...state, listReportItem: action.payload }
-        case 'REPORT_SET_LOCAL_LIST_ITEM':
-            return { ...state, listReportItem: action.payload }
+
+        case 'REPORT_SET_LOCAL_LIST_RESOLVED':
+        case 'REPORT_SET_LIST_RESOLVED':
+            return { ...state, listReportResolve: action.payload }
+
         case 'REPORT_SET_LIST_SCAN':
             return { ...state, listReportScan: [...state.listReportScan, action.payload] }
         case 'REPORT_SET_LIST_UPLOAD':
@@ -53,7 +60,9 @@ const reportReducer = (state, action) => {
 
 const localToState = dispatch => async() => {
     const localReportItem = JSON.parse(await AsyncStorage.getItem('localReportItem')) || [];
+    const localResolvedReport = JSON.parse(await AsyncStorage.getItem('localResolvedReport')) || [];
     dispatch({ type: 'REPORT_SET_LOCAL_LIST_ITEM', payload: localReportItem });
+    dispatch({ type: 'REPORT_SET_LOCAL_LIST_RESOLVED', payload: localResolvedReport });
 }
 const getReportState = dispatch => async() => {
     dispatch({ type: 'DEFAULT' });
@@ -98,6 +107,36 @@ const addReportItem = dispatch => async(data) => {
         await AsyncStorage.setItem('localReportItem', JSON.stringify(newReportItem));
 
         dispatch({ type: 'REPORT_SET_LIST_ITEM', payload: newReportItem });
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+const addReportResolve = dispatch => async(data) => {
+    try {
+        // await AsyncStorage.removeItem('localReportItem');
+        const token = await AsyncStorage.getItem('token');
+        const userDetail = jwtDecode(token);
+        const id_user = userDetail.data.id_user;
+
+        data.resolved_by = id_user;
+        data.resolved_at = moment().format('YYYY-MM-DD HH:mm:ss');
+
+        const localResolvedReport = JSON.parse(await AsyncStorage.getItem('localResolvedReport')) || [];
+        
+        const checkExisting = (localResolvedReport || []).find(v => 
+            v.idReport == data.idReport);
+
+        let newResolvedReport = localResolvedReport;
+        if(checkExisting){
+            const deletedlocalResolvedReport = localResolvedReport.filter(v => v != checkExisting);
+            newResolvedReport = [ ...deletedlocalResolvedReport ];
+        }
+        
+        newResolvedReport = [ ...newResolvedReport, data ];
+        await AsyncStorage.setItem('localResolvedReport', JSON.stringify(newResolvedReport));
+
+        dispatch({ type: 'REPORT_SET_LIST_RESOLVED', payload: newResolvedReport });
     } catch (error) {
         console.log(error);
     }
@@ -160,6 +199,22 @@ const fetchAsset = dispatch => async () => {
     }
 };
 
+const fetchComplaint = dispatch => async () => {
+    try {
+        dispatch({ type: 'REPORT_SET_LOADING', payload: true });
+        const response = await easymoveinApi.get('/get_list_report.php');
+        const data = response.data || [];
+        const bafReport = data.baf_report || [];
+
+        await AsyncStorage.setItem('serverReportItem', JSON.stringify(bafReport));
+
+        dispatch({ type: 'REPORT_FETCH_COMPLAINT', payload: bafReport });
+    } catch (error) {
+        console.log(error);
+        // processError(error);
+    }
+};
+
 const doPostReport = dispatch => async (val) => {
     try {
         const localReportItem = JSON.parse(await AsyncStorage.getItem('localReportItem')) || [];
@@ -184,15 +239,31 @@ const doPostReport = dispatch => async (val) => {
                 console.log(response.data);
             });
         })
-        // console.log('do Post Report', val);
-        // dispatch({ type: 'REPORT_SET_LOADING', payload: true });
-        // const response = await easymoveinApi.get('/get_asset.php');
-        // const data = response.data || [];
-        // const bafAsset = data.baf_asset || [];
+    } catch (error) {
+        console.log(error);
+        // processError(error);
+    }
+};
 
-        // await AsyncStorage.setItem('localAssetItem', JSON.stringify(bafAsset));
+const doPostResolve = dispatch => async (val) => {
+    try {
+        const localResolvedReport = JSON.parse(await AsyncStorage.getItem('localResolvedReport')) || [];
 
-        // dispatch({ type: 'REPORT_FETCH_ASSET', payload: bafAsset });
+        await localResolvedReport.map(async u => {
+            const photo = u.photo || '';
+            const base64 = await FileSystem.readAsStringAsync(photo, { encoding: 'base64' });
+
+            const uploadData = {
+                data: { ...u, id_report: u.idReport },
+                photo: base64
+            }
+            // formData.append('photo', image);
+
+            const response = await easymoveinApi.post('/post_resolve.php', JSON.stringify(uploadData));
+
+            console.log('================');
+            console.log(response.data);
+        });
     } catch (error) {
         console.log(error);
         // processError(error);
@@ -223,8 +294,8 @@ const defaultList = {
 
 export const { Provider, Context} = createDataContext(
     reportReducer,
-    { doPostReport, fetchAsset, getReportState, addReportItem, addScanItem, addUploadItem, setCurrentZone, setCurrentScan, resetReportScan, resetReportTemp, deleteScanItem, localToState },
+    { doPostReport, doPostResolve, fetchAsset, fetchComplaint, getReportState, addReportItem, addReportResolve, addScanItem, addUploadItem, setCurrentZone, setCurrentScan, resetReportScan, resetReportTemp, deleteScanItem, localToState },
 
     // default state reduce
-    { loading: false, listAsset: [], listReportItem: [], listReportUpload: [], listReportScan: [], currentReportAsset:[], currentReportZone: {}, currentReportScan: {} }
+    { loading: false, listAsset: [], listComplaint: [], listReportItem: [], listReportResolve: [], listReportUpload: [], listReportScan: [], currentReportAsset:[], currentReportZone: {}, currentReportScan: {} }
 )

@@ -50,7 +50,7 @@ const ReportListScreen = ({ navigation }) => {
             return <View key={key} style={styles.container}>
               <Button 
                 buttonStyle={{ backgroundColor: `${bgFloor}` }}
-                onPress={() => canAccess ? navigation.navigate('ReportZone', { ...v }) : null}
+                onPress={() => canAccess ? navigation.navigate('ReportZone', { ...v, parentScreen: 'Report' }) : null}
                 title={v.floor}
               />
             </View>
