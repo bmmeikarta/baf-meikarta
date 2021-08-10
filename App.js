@@ -21,8 +21,10 @@ import ResolveAuthScreen from './src/screens/ResolveAuthScreen';
 import { StyleSheet, Text } from 'react-native';
 import ScannerScreen from './src/screens/ScannerScreen';
 import ScannerScreenZone from './src/screens/ScannerScreenZone';
+import ScannerScreenCheckIn from './src/screens/ScannerScreenCheckIn';
 import ResolveListTableScreen from './src/screens/ResolveListTableScreen';
 import ResolveFormScreen from './src/screens/ResolveFormScreen';
+import CheckInScreen from './src/screens/CheckInScreen';
 
 const styles = StyleSheet.create({
   headerTitle: {
@@ -41,6 +43,18 @@ const switchNavigator = createSwitchNavigator({
     homeFlow: {
       screen: createStackNavigator({
         Home: HomeScreen,
+        CheckIn: {
+          screen: CheckInScreen,
+          navigationOptions: {
+            headerTitle: ()=><Text style={styles.headerTitle}>{'CheckIn'}</Text>,
+          }
+        },
+        CheckInScanner: {
+          screen: ScannerScreenCheckIn,
+          navigationOptions: {
+            headerTitle: ()=><Text style={styles.headerTitle}>{'CheckIn Scanner'}</Text>,
+          }
+        },
       }),
       navigationOptions: {
         tabBarLabel: ()=>null,

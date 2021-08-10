@@ -145,7 +145,7 @@ const RenderRow = ({ block, tower, floor, statusFloor, parentComponent }) => {
 }
 
 
-export const Timer = ({getCurrentShift}) => {
+export const Timer = ({label, getCurrentShift}) => {
     const [timeLeft, setTimeLeft] = useState('--:--');
 
     // console.log(state);
@@ -168,7 +168,7 @@ export const Timer = ({getCurrentShift}) => {
 
     return (
         <View style={styles.containerTimer}>
-            <Text style={[styles.textTimer, { marginBottom: 5 }]}>Next Schedule in</Text>
+            <Text style={[styles.textTimer, { marginBottom: 5 }]}>{label || 'Next Schedule In'}</Text>
             <View style={{ alignSelf: 'center', backgroundColor: '#2fc2b8', paddingVertical: 5, paddingHorizontal: 10, borderRadius: 5 }}>
                 <Text style={styles.textTimer}>{timeLeft}</Text>
             </View>

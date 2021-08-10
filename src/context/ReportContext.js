@@ -79,7 +79,7 @@ const addReportItem = dispatch => async(data) => {
         //BYPASS ADMIN, DELETE LATER
         const hourNow = moment().format('H');
         if(!shift){
-            if(hourNow >= 7 && hourNow < 15) shift = 1;
+            if(hourNow >= 8 && hourNow < 15) shift = 1;
             if(hourNow >= 15 && hourNow < 22) shift = 2;
             if(hourNow >= 22 || hourNow < 5) shift = 3;
         }

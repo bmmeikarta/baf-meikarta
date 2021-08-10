@@ -4,16 +4,20 @@ import {Text, Button, Badge} from "react-native-elements";
 import { NavigationEvents, SafeAreaView } from "react-navigation";
 import { Context as ScheduleContext } from "../context/ScheduleContext";
 import { Context as ReportContext } from "../context/ReportContext";
+import { Context as AuthContext } from "../context/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import moment from "moment";
 import { Ionicons } from "@expo/vector-icons";
 import NetInfo from "@react-native-community/netinfo";
 
 const HomeScreen = ({ navigation }) => {
+    const { state: authState } = useContext(AuthContext);
     const { fetchSchedule, fetchSchedulePattern, getCurrentShift } = useContext(ScheduleContext);
     const { state, localToState, getReportState, addReportItem, fetchAsset, fetchComplaint, doPostReport, doPostResolve } = useContext(ReportContext);
-    const { loading, lastUpdateDB, listAsset, testVal, listReportItem, listReportResolve } = state;
     
+    const { loading, lastUpdateDB, listAsset, testVal, listReportItem, listReportResolve } = state;
+    const { userDetail } = authState;
+
     const countNotSync = listReportResolve.length + listReportItem.length;
     const exampleData = [{
         "blocks": "51022",
@@ -125,13 +129,24 @@ const HomeScreen = ({ navigation }) => {
                     onPress={()=> !loading ? navigation.navigate('ScheduleList') : null} 
                 />
                 <View style={styles.row}>
-                    <View style={styles.container}>
-                        <Button 
-                            buttonStyle={[styles.buttonChild, { backgroundColor: '#eb8015' }]}
-                            title="COMPLAINT" 
-                            onPress={()=> !loading ? navigation.navigate('ReportList') : null} 
-                        />
-                    </View>
+                    {userDetail.profile_id == 100 &&
+                        <View style={styles.container}>
+                            <Button 
+                                buttonStyle={[styles.buttonChild, { backgroundColor: '#eb8015' }]}
+                                title="CHECK-IN" 
+                                onPress={()=> !loading ? navigation.navigate('CheckIn') : null} 
+                            />
+                        </View>
+                    }
+                    {userDetail.profile_id != 100 &&
+                        <View style={styles.container}>
+                            <Button 
+                                buttonStyle={[styles.buttonChild, { backgroundColor: '#eb8015' }]}
+                                title="COMPLAINT" 
+                                onPress={()=> !loading ? navigation.navigate('ReportList') : null} 
+                            />
+                        </View>
+                    }
                     <View style={styles.container}>
                         <Button 
                             buttonStyle={[styles.buttonChild, { backgroundColor: '#0fbd32' }]}
