@@ -10,14 +10,16 @@ const ReportZoneScreen = ({ navigation }) => {
     const { currentReportZone } =  state;
 
     const onChooseZone = async (zone) => {
-        const floorName = block_name + ' - ' + tower + ' - ' + floor + ' - Zone ' + zone;
+        const floorName = blocks + ' - ' + tower + ' - ' + floor + ' - Zone ' + zone;
         await setCurrentZone({blocks, tower, floor, zone});
         // navigation.navigate('ReportDetail', { headerTitle: `${floorName}` });
 
         navigation.navigate('ReportScannerZone', { headerTitle: `${floorName}`, zone, parentScreen });
 
     };
-    const checkZoneStored = () => {};
+    const checkZoneStored = () => {
+        
+    };
 
     return (<>
         <NavigationEvents 
@@ -26,7 +28,7 @@ const ReportZoneScreen = ({ navigation }) => {
             }}
         />
         <View style={styles.screen}>
-            <Text style={styles.textBlockName}>{block_name} - {tower} - {floor}</Text>
+            <Text style={styles.textBlockName}>{blocks} - {tower} - {floor}</Text>
             <View style={styles.zoneOption}>
                 <TouchableOpacity onPress={() => onChooseZone(3)} style={{ width: 50, height: 80 }}>
                     <View style={{ width: 50, height: 80, justifyContent: 'center' }}>

@@ -52,6 +52,7 @@ const HomeScreen = ({ navigation }) => {
     
     const fetchLocalReportItem = async() => {
         // await AsyncStorage.removeItem('localReportItem');
+        // await AsyncStorage.removeItem('localResolvedReport');
         const local = await AsyncStorage.getItem('localReportItem');
         const localResolvedReport = await AsyncStorage.getItem('localResolvedReport');
         // navigation.setParams({ localReport: state.listReportItem, doPostReport: doPostReport });
@@ -129,7 +130,7 @@ const HomeScreen = ({ navigation }) => {
                     onPress={()=> !loading ? navigation.navigate('ScheduleList') : null} 
                 />
                 <View style={styles.row}>
-                    {userDetail.profile_id == 100 &&
+                    {userDetail.profile_id == 28 &&
                         <View style={styles.container}>
                             <Button 
                                 buttonStyle={[styles.buttonChild, { backgroundColor: '#eb8015' }]}
@@ -138,7 +139,7 @@ const HomeScreen = ({ navigation }) => {
                             />
                         </View>
                     }
-                    {userDetail.profile_id != 100 &&
+                    {userDetail.profile_id != 28 &&
                         <View style={styles.container}>
                             <Button 
                                 buttonStyle={[styles.buttonChild, { backgroundColor: '#eb8015' }]}

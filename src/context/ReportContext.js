@@ -70,6 +70,7 @@ const getReportState = dispatch => async() => {
 
 const addReportItem = dispatch => async(data) => {
     try {
+        console.log(data);
         // await AsyncStorage.removeItem('localReportItem');
         const token = await AsyncStorage.getItem('token');
         const userDetail = jwtDecode(token);
@@ -95,13 +96,15 @@ const addReportItem = dispatch => async(data) => {
             v.blocks == data.blocks && v.floor == data.floor && v.tower == data.tower && v.zone == data.zone);
 
         let newReportItem = localReportItem;
+        
         if(checkExisting){
             const deletedLocalReportItem = localReportItem.filter(v => v != checkExisting);
             newReportItem = [ ...deletedLocalReportItem ];
+            // MERGE listReportUpload from local
+            data.listReportUpload = [ ...data.listReportUpload, ...checkExisting.listReportUpload ];
         }
         
-        // MERGE listReportUpload from local
-        data.listReportUpload = [ ...data.listReportUpload, ...checkExisting.listReportUpload ];
+        
         
         newReportItem = [ ...newReportItem, data ];
         await AsyncStorage.setItem('localReportItem', JSON.stringify(newReportItem));

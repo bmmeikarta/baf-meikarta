@@ -36,7 +36,7 @@ const ScheduleListScreen = ({ navigation, showActiveOnly, parentComponent }) => 
         <ScrollView style={styles.screen}>
             <Timer getCurrentShift={getCurrentShift}/>
             { dataUnit.length > 0 &&
-                <Text style={styles.textBlockName}>{dataUnit[0].block_name}</Text>
+                <Text style={styles.textBlockName}>{dataUnit[0].blocks}</Text>
             }
             <View style={styles.header}>
                 <View style={[styles.items, { backgroundColor: 'orange' }]}><Text style={styles.textStyle}>1B</Text></View>
@@ -49,7 +49,7 @@ const ScheduleListScreen = ({ navigation, showActiveOnly, parentComponent }) => 
                 {
                     (dataUnit || []).map((datum, idx) => { // This will render a row for each data element.
                         const statusFloor = getStatusFloor(userDetail, currentShift, schedulePattern, datum.blocks, datum.floor);
-                        const floorName = datum.block_name + ' - ' + datum.floor;
+                        const floorName = datum.blocks + ' - ' + datum.floor;
 
                         if(showActiveOnly && statusFloor != 'active') return false;
                         return <RenderRow 

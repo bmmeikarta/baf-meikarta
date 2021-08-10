@@ -28,7 +28,7 @@ const mapWorkHour = [
         work_hour: [
             {
                 shift: 1,
-                start: 7,
+                start: 8,
                 end: 15
             },
             {
@@ -110,7 +110,13 @@ const fetchSchedulePattern = dispatch => async () => {
 
 const fetchSchedule = dispatch => async () => {
     try {
-        const response = await easymoveinApi.get('/get_schedule.php');
+        const token = await AsyncStorage.getItem('token');
+        const userDetail = jwtDecode(token);
+        
+        const block = userDetail.data.absensi_block || '51022';
+        const tower = '1B';
+
+        const response = await easymoveinApi.get('/get_schedule.php?block='+ block +'&tower=' + tower);
         const data = response.data || [];
         const masterUnit = data.master_unit || [];
 
@@ -161,7 +167,8 @@ const getCurrentShift = dispatch => async (x) => {
 const getActiveFloor = dispatch => async(currentShift, schedulePattern, blocks) => {
     const token = await AsyncStorage.getItem('token');
     const userDetail = jwtDecode(token);
-    
+    const block = userDetail.data.absensi_block;
+
     let job = userDetail.data.profile_id;
 
     if([21,14,12].includes(job) == false) job = 12; // DEFAULT CSO 
@@ -176,7 +183,7 @@ const getActiveFloor = dispatch => async(currentShift, schedulePattern, blocks) 
         jamKe = parseInt(hourNow) + 1;
     }
 
-    const activeBlock = schedulePattern.find(v => v.block == blocks && v.job == job) || {};
+    const activeBlock = schedulePattern.find(v => v.block == block && v.job == job) || {};
     const blockPattern = activeBlock.patterns || [];
     const activeFloor = blockPattern['pattern_' + jamKe] || '';
     const activeIDX = activeFloor.split(',');

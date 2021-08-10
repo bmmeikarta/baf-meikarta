@@ -32,7 +32,7 @@ const ReportListScreen = ({ navigation }) => {
             <Text style={styles.textBlockName}>loading..</Text>
         }
         { dataUnit.length > 0 &&
-            <Text style={styles.textBlockName}>{dataUnit[0].block_name} - {dataUnit[0].tower}</Text>
+            <Text style={styles.textBlockName}>{dataUnit[0].blocks} - {dataUnit[0].tower}</Text>
         }
         <View style={styles.row}>
 
