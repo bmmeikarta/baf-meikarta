@@ -73,7 +73,7 @@ const ScheduleListScreen = ({ navigation, showActiveOnly, parentComponent }) => 
 
 export const getStatusFloor = (userDetail, currentShift, schedulePattern, blocks, floor) => {
     const { state: reportState } = useContext(ReportContext);
-    const { listReportItem } = reportState;
+    const { listReportItem, listLog } = reportState;
 
     let job = ((userDetail || {}).data || {}).profile_id;
     
@@ -100,7 +100,7 @@ export const getStatusFloor = (userDetail, currentShift, schedulePattern, blocks
         inactiveFloor += floors + ',';
     }
     const floorSkippedIDX = inactiveFloor.split(',');
-    const checkZoneReport = listReportItem.filter(v => v.blocks == blocks && v.floor == floor);
+    const checkZoneReport = listLog.filter(v => v.blocks == blocks && v.floor == floor);
     const canAccess = floorSkippedIDX.includes(floor.toString()) || activeIDX.includes(floor.toString());
     
     if(checkZoneReport.length > 0 && checkZoneReport.length < 4 && canAccess) return 'on progress';
@@ -113,7 +113,7 @@ export const getStatusFloor = (userDetail, currentShift, schedulePattern, blocks
 
 const RenderRow = ({ block, tower, floor, statusFloor, parentComponent }) => {
     const { state: reportState } = useContext(ReportContext);
-    const { listReportItem } = reportState;
+    const { listLog } = reportState;
 
     let bgFloor = '#ff9cf5';
     let bgZone = '#000';
@@ -135,9 +135,11 @@ const RenderRow = ({ block, tower, floor, statusFloor, parentComponent }) => {
         <View style={styles.trow}>
             <View style={[styles.items, { backgroundColor: `${bgFloor}` }]}><Text style={styles.textStyle}>{floor}</Text></View>
             {[1,2,3,4].map((zone, key) => {
-                // const isDone = listReportItem.find(z => z.zone == zone && z.blocks == block && z.floor == floor && z.tower == tower);
-                // if(isDone) bgZone = '#41db30';
-                return <TouchableOpacity key={key} style={[styles.items, { backgroundColor: `${bgZone}` }]}></TouchableOpacity >
+                let newBgZone = bgZone;
+                const isDone = listLog.find(z => z.zone == zone && z.blocks == block && z.floor == floor && z.tower == tower);
+                
+                if(statusFloor == 'on progress' && isDone) newBgZone = '#41db30';
+                return <TouchableOpacity key={key} style={[styles.items, { backgroundColor: `${newBgZone}` }]}></TouchableOpacity >
                 
             })}
         </View>

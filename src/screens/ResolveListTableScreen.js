@@ -5,11 +5,19 @@ import { Context as ReportContext } from '../context/ReportContext';
 
 const ResolveListTableScreen = ({ navigation }) => {
     const { state, getReportState, addReportItem } = useContext(ReportContext);
-    const { currentReportZone, listComplaint  } = state;
+    const { currentReportZone, listComplaint, listReportResolve  } = state;
     const rowComplaint = (listComplaint || []).filter(v => v.blocks == currentReportZone.blocks 
         && v.tower == currentReportZone.tower && v.floor == currentReportZone.floor 
         && v.zone == currentReportZone.zone
-    ) || {};
+    ).map(v => {
+        const isResolved = listReportResolve.find(z => z.idReport == v.idx);
+        v.status = isResolved ? 'RESOLVED': v.status;
+        v.photo_after = isResolved ? isResolved.photo : 'https://easymovein.id/save_baf/' + v.photo_after;
+        
+        return v;
+    });
+
+    console.log(listReportResolve);
 
     const header = [
         'Category',
@@ -28,7 +36,8 @@ const ResolveListTableScreen = ({ navigation }) => {
     }
 
     const Row = ({ idx, data }) => {
-        const bgColor = idx % 2 == 0 ? '#c7e4ff':'#c7e4ff';
+        let bgColor = '#c7e4ff';
+        if(data.status == 'RESOLVED') bgColor = '#41db30';
         const onHandleRow = () => {
             navigation.navigate('ResolveForm', data);
         }

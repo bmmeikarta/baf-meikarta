@@ -9,16 +9,21 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import moment from "moment";
 import { Ionicons } from "@expo/vector-icons";
 import NetInfo from "@react-native-community/netinfo";
+import _ from "lodash";
 
 const HomeScreen = ({ navigation }) => {
     const { state: authState } = useContext(AuthContext);
     const { fetchSchedule, fetchSchedulePattern, getCurrentShift } = useContext(ScheduleContext);
-    const { state, localToState, getReportState, addReportItem, fetchAsset, fetchComplaint, doPostReport, doPostResolve } = useContext(ReportContext);
+    const { state, localToState, fetchAsset, fetchComplaint, fetchLog, doPostReport, doPostResolve } = useContext(ReportContext);
     
-    const { loading, lastUpdateDB, listAsset, testVal, listReportItem, listReportResolve } = state;
+    const { loading, lastUpdateDB, listAsset, testVal, listReportItem, listReportResolve, listComplaint } = state;
     const { userDetail } = authState;
 
+    const countReportUpload = _.sum(listReportItem.map(v => v.listReportUpload.length));
+
     const countNotSync = listReportResolve.length + listReportItem.length;
+    const countNotResolve = listComplaint.filter(v => v.status == 'REPORTED').length;
+
     const exampleData = [{
         "blocks": "51022",
         "floor": "27",
@@ -55,27 +60,33 @@ const HomeScreen = ({ navigation }) => {
         // await AsyncStorage.removeItem('localResolvedReport');
         const local = await AsyncStorage.getItem('localReportItem');
         const localResolvedReport = await AsyncStorage.getItem('localResolvedReport');
+        const serverLog = await AsyncStorage.getItem('serverLog');
+        const serverComplaint = await AsyncStorage.getItem('serverComplaint');
         // navigation.setParams({ localReport: state.listReportItem, doPostReport: doPostReport });
         // console.log('HOME ', state.listReportItem);
-        console.log('LOCAL ', JSON.parse(local));
+        // console.log('LOCAL ', JSON.parse(local));
         console.log('RESOLVED ', JSON.parse(localResolvedReport));
+        // console.log('LOG ', JSON.parse(serverLog));
+        console.log('COMPLAINT ', JSON.parse(serverComplaint));
     }
 
     const onSyncData = async () => {
         await NetInfo.fetch().then(async isConnected => {
             if (isConnected) {
-                await doPostReport();
-                await doPostResolve();
+                await fetchLog();
                 await fetchComplaint();
-                await localToState();
                 await fetchLocalReportItem();
                 // await addReportItem(exampleData[0]);
                 await fetchAsset();
                 await fetchSchedule();
                 await fetchSchedulePattern();
                 await getCurrentShift();
+
+                await localToState();
+                await doPostReport();
+                await doPostResolve();
             } else {
-                Alert.alert("Oopss..", "Sorry you're offline");
+                Alert.alert("Oopss..", "Sorry you're offline now, please sync your data later");
             }
         });
         
@@ -130,7 +141,7 @@ const HomeScreen = ({ navigation }) => {
                     onPress={()=> !loading ? navigation.navigate('ScheduleList') : null} 
                 />
                 <View style={styles.row}>
-                    {userDetail.profile_id == 28 &&
+                    {((userDetail || {}).data || {}).profile_id == 28 &&
                         <View style={styles.container}>
                             <Button 
                                 buttonStyle={[styles.buttonChild, { backgroundColor: '#eb8015' }]}
@@ -139,7 +150,7 @@ const HomeScreen = ({ navigation }) => {
                             />
                         </View>
                     }
-                    {userDetail.profile_id != 28 &&
+                    {((userDetail || {}).data || {}).profile_id != 28 &&
                         <View style={styles.container}>
                             <Button 
                                 buttonStyle={[styles.buttonChild, { backgroundColor: '#eb8015' }]}
@@ -154,6 +165,13 @@ const HomeScreen = ({ navigation }) => {
                             title="RESOLVE" 
                             onPress={()=> !loading ? navigation.navigate('ResolveList') : null} 
                         />
+                        { countNotResolve > 0 &&
+                            <Badge
+                                value={countNotResolve}
+                                status="error"
+                                containerStyle={styles.badgeStyle} 
+                            />
+                        }
                     </View>
                     <View style={styles.container}>
                         <Button 
@@ -190,7 +208,7 @@ const styles = StyleSheet.create({
         paddingVertical: 10
     },
     container: {
-        width: '33%'
+        width: '32%'
     },
     buttonChild: {
         paddingHorizontal: 8,

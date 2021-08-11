@@ -43,23 +43,19 @@ const mapWorkHour = [
             },
         ]
     },
+    // TODO: JANGAN LUPA GANTI 
     {
         job: 14, // SEC
         work_hour: [
             {
                 shift: 1,
-                start: 8,
-                end: 15
+                start: 5,
+                end: 20
             },
             {
                 shift: 2,
-                start: 15,
-                end: 22
-            },
-            {
-                shift: 3,
-                start: 22,
-                end: 5
+                start: 20,
+                end: 8
             },
         ]
     },
@@ -137,11 +133,10 @@ const getCurrentShift = dispatch => async (x) => {
     const token = await AsyncStorage.getItem('token');
     const userDetail = jwtDecode(token);
     
-    let job = userDetail.data.profile_id; // TODO: get from profile
+    let job = parseInt(userDetail.data.profile_id); // TODO: get from profile
     let shift = userDetail.data.shift;
 
     const hourNow = moment().format('H');
-
     if([21,14,12].includes(job) == false) job = 12; // DEFAULT CSO 
 
     if(!shift){
@@ -161,6 +156,7 @@ const getCurrentShift = dispatch => async (x) => {
 
                                 return v.shift == shift && (hourNow >= v.start && hourNow < v.end)
                             }) || {};
+    
     dispatch({ type: 'SCHEDULE_CURRENT_SHIFT', payload: currentShift });
 }
 
@@ -168,7 +164,7 @@ const getActiveFloor = dispatch => async(currentShift, schedulePattern, blocks) 
     const token = await AsyncStorage.getItem('token');
     const userDetail = jwtDecode(token);
     const block = userDetail.data.absensi_block;
-
+    
     let job = userDetail.data.profile_id;
 
     if([21,14,12].includes(job) == false) job = 12; // DEFAULT CSO 

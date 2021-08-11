@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert } from "react-native";
 import Svg, { Rect } from "react-native-svg";
 import { NavigationEvents } from "react-navigation";
 import { Context as ReportContext } from '../context/ReportContext';
@@ -7,9 +7,11 @@ import { Context as ReportContext } from '../context/ReportContext';
 const ReportZoneScreen = ({ navigation }) => {
     const { state, setCurrentZone, resetReportTemp } = useContext(ReportContext);
     const { block_name, blocks, tower, floor, parentScreen } = navigation.state.params;
-    const { currentReportZone } =  state;
+    const { currentReportZone, listLog, listComplaint } =  state;
 
     const onChooseZone = async (zone) => {
+        const isDone = listLog.find(z => z.zone == zone && z.blocks == blocks && z.floor == floor && z.tower == tower);
+        if(isDone && parentScreen == 'Report') return;
         const floorName = blocks + ' - ' + tower + ' - ' + floor + ' - Zone ' + zone;
         await setCurrentZone({blocks, tower, floor, zone});
         // navigation.navigate('ReportDetail', { headerTitle: `${floorName}` });
@@ -17,8 +19,25 @@ const ReportZoneScreen = ({ navigation }) => {
         navigation.navigate('ReportScannerZone', { headerTitle: `${floorName}`, zone, parentScreen });
 
     };
-    const checkZoneStored = () => {
+    const checkZoneStored = (zone) => {
+        if(parentScreen == 'Report'){
+            const isDone = listLog.find(z => z.zone == zone && z.blocks == blocks && z.floor == floor && z.tower == tower);
+
+            if(zone==4) return isDone ? "grey" : "green";
+            if(zone==3) return isDone ? "grey" : "blue";
+            if(zone==2) return isDone ? "grey" : "#ffcea1";
+            if(zone==1) return isDone ? "grey" : "orange";
+            
+        }
+
+        if(parentScreen == 'Resolve'){
+            const anyProblem = listComplaint.filter(z => z.zone == zone && z.blocks == blocks && z.floor == floor && z.tower == tower && z.status == 'REPORTED').length > 0;
         
+            if(zone==4) return anyProblem ? "#bd0f0f" : "green";
+            if(zone==3) return anyProblem ? "#bd0f0f" : "blue";
+            if(zone==2) return anyProblem ? "#bd0f0f" : "#ffcea1";
+            if(zone==1) return anyProblem ? "#bd0f0f" : "orange";
+        }
     };
 
     return (<>
@@ -38,7 +57,7 @@ const ReportZoneScreen = ({ navigation }) => {
                                 y="0"
                                 width="50"
                                 height="80"
-                                fill={checkZoneStored(3) ? "grey" : "blue"}
+                                fill={checkZoneStored(3)}
                             />
                         </Svg>
                         <Text style={{ position: 'absolute', left: 3, color: checkZoneStored(3) ? 'white' : '#fff' }}>Zone 3</Text>
@@ -52,7 +71,7 @@ const ReportZoneScreen = ({ navigation }) => {
                                 y="0"
                                 width="170"
                                 height="50"
-                                fill={checkZoneStored(2) ? "grey" : "#ffcea1"}
+                                fill={checkZoneStored(2)}
                             />
                         </Svg>
                         <Text style={{ position: 'absolute', left: '50%', color: checkZoneStored(2) ? 'white' : '#000' }}>Zone 2</Text>
@@ -66,7 +85,7 @@ const ReportZoneScreen = ({ navigation }) => {
                                 y="0"
                                 width="50"
                                 height="80"
-                                fill={checkZoneStored(4) ? "grey" : "green"}
+                                fill={checkZoneStored(4)}
                             />
                             <Text style={{ position: 'absolute', color: checkZoneStored(4) ? 'white' : '#fff', top: 30, left: 3 }}>Zone 4</Text>
                         </Svg>
@@ -80,7 +99,7 @@ const ReportZoneScreen = ({ navigation }) => {
                                 y="0"
                                 width="50"
                                 height="120"
-                                fill={checkZoneStored(1) ? "grey" : "orange"}
+                                fill={checkZoneStored(1)}
                             />
                         </Svg>
                         <Text style={{ position: 'absolute', color: 'white', left: 3 }}>

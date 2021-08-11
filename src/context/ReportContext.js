@@ -16,14 +16,16 @@ const reportReducer = (state, action) => {
             return { ...state, listAsset: action.payload, lastUpdateDB: moment().format('YYYY-MM-DD HH:mm:ss'), loading: false };
         case 'REPORT_FETCH_COMPLAINT':
             return { ...state, listComplaint: action.payload, loading: false };
+        case 'REPORT_FETCH_LOG':
+            return { ...state, listLog: action.payload, loading: false };
 
         case 'REPORT_SET_LOCAL_LIST_ITEM':
         case 'REPORT_SET_LIST_ITEM':
-            return { ...state, listReportItem: action.payload }
+            return { ...state, listReportItem: action.payload, loading: false }
 
         case 'REPORT_SET_LOCAL_LIST_RESOLVED':
         case 'REPORT_SET_LIST_RESOLVED':
-            return { ...state, listReportResolve: action.payload }
+            return { ...state, listReportResolve: action.payload, loading: false }
 
         case 'REPORT_SET_LIST_SCAN':
             return { ...state, listReportScan: [...state.listReportScan, action.payload] }
@@ -61,8 +63,13 @@ const reportReducer = (state, action) => {
 const localToState = dispatch => async() => {
     const localReportItem = JSON.parse(await AsyncStorage.getItem('localReportItem')) || [];
     const localResolvedReport = JSON.parse(await AsyncStorage.getItem('localResolvedReport')) || [];
+    const serverLog = JSON.parse(await AsyncStorage.getItem('serverLog')) || [];
+    const serverComplaint = JSON.parse(await AsyncStorage.getItem('serverComplaint')) || [];
+
     dispatch({ type: 'REPORT_SET_LOCAL_LIST_ITEM', payload: localReportItem });
     dispatch({ type: 'REPORT_SET_LOCAL_LIST_RESOLVED', payload: localResolvedReport });
+    dispatch({ type: 'REPORT_FETCH_LOG', payload: serverLog });
+    dispatch({ type: 'REPORT_FETCH_COMPLAINT', payload: serverComplaint });
 }
 const getReportState = dispatch => async() => {
     dispatch({ type: 'DEFAULT' });
@@ -70,7 +77,6 @@ const getReportState = dispatch => async() => {
 
 const addReportItem = dispatch => async(data) => {
     try {
-        console.log(data);
         // await AsyncStorage.removeItem('localReportItem');
         const token = await AsyncStorage.getItem('token');
         const userDetail = jwtDecode(token);
@@ -103,13 +109,11 @@ const addReportItem = dispatch => async(data) => {
             // MERGE listReportUpload from local
             data.listReportUpload = [ ...data.listReportUpload, ...checkExisting.listReportUpload ];
         }
-        
-        
-        
+
         newReportItem = [ ...newReportItem, data ];
         await AsyncStorage.setItem('localReportItem', JSON.stringify(newReportItem));
 
-        dispatch({ type: 'REPORT_SET_LIST_ITEM', payload: newReportItem });
+        // dispatch({ type: 'REPORT_SET_LIST_ITEM', payload: newReportItem });
     } catch (error) {
         console.log(error);
     }
@@ -205,13 +209,39 @@ const fetchAsset = dispatch => async () => {
 const fetchComplaint = dispatch => async () => {
     try {
         dispatch({ type: 'REPORT_SET_LOADING', payload: true });
-        const response = await easymoveinApi.get('/get_list_report.php');
+        const token = await AsyncStorage.getItem('token');
+        const userDetail = jwtDecode(token);
+        const block = userDetail.data.absensi_block;
+        const userID = userDetail.data.id_user;
+        const profileID = userDetail.data.profile_id;
+        console.log('/get_list_report.php?block=' + block + '&profile_id=' + profileID + '&id_user=' + userID)
+        const response = await easymoveinApi.get('/get_list_report.php?block=' + block + '&profile_id=' + profileID + '&id_user=' + userID);
         const data = response.data || [];
         const bafReport = data.baf_report || [];
 
-        await AsyncStorage.setItem('serverReportItem', JSON.stringify(bafReport));
-
+        await AsyncStorage.setItem('serverComplaint', JSON.stringify(bafReport));
+        
         dispatch({ type: 'REPORT_FETCH_COMPLAINT', payload: bafReport });
+    } catch (error) {
+        console.log(error);
+        // processError(error);
+    }
+};
+
+const fetchLog = dispatch => async () => {
+    try {
+        dispatch({ type: 'REPORT_SET_LOADING', payload: true });
+        const token = await AsyncStorage.getItem('token');
+        const userDetail = jwtDecode(token);
+        const userID = userDetail.data.id_user;
+
+        const response = await easymoveinApi.get('/get_baf_log.php?id_user=' + userID);
+        const data = response.data || [];
+        const bafLog = data.baf_log || [];
+
+        await AsyncStorage.setItem('serverLog', JSON.stringify(bafLog));
+        
+        dispatch({ type: 'REPORT_FETCH_LOG', payload: bafLog });
     } catch (error) {
         console.log(error);
         // processError(error);
@@ -220,27 +250,57 @@ const fetchComplaint = dispatch => async () => {
 
 const doPostReport = dispatch => async (val) => {
     try {
+        dispatch({ type: 'REPORT_SET_LOADING', payload: true });
         const localReportItem = JSON.parse(await AsyncStorage.getItem('localReportItem')) || [];
+        let tempItem = localReportItem;
 
-        const reqPost = await localReportItem.map( async v => {
-            const listReportUpload = v.listReportUpload || [];
-            await listReportUpload.map(async u => {
-                const photo = u.photo_before || '';
-                const photoName = photo.split('/').pop();
-                const image= "data:image/jpeg;base64," + (Platform.OS === 'ios' ? photo.replace('file://', '') : photo);
-                const base64 = await FileSystem.readAsStringAsync(photo, { encoding: 'base64' });
+        await localReportItem.map( async headerLocal => {
+            const bafLogData = {
+                data: { ...headerLocal, listReportUpload: [] },
+            }
+            await easymoveinApi.post('/post_baf_log.php', JSON.stringify(bafLogData))
+                .then( async (res) => {
+                    const listReportUpload = headerLocal.listReportUpload || [];
+                    // console.log(listReportUpload);
+                    await listReportUpload.map(async itemUpload => {
+                        const photo = itemUpload.photo_before || '';
+                        const base64 = await FileSystem.readAsStringAsync(photo, { encoding: 'base64' });
 
-                const uploadData = {
-                    data: { ...v, ...u, listReportUpload: [] },
-                    photo: base64
+                        const uploadData = {
+                            data: { ...headerLocal, ...itemUpload, listReportUpload: [] },
+                            photo: base64
+                        }
+                        // formData.append('photo', image);
+
+                        const response = await easymoveinApi.post('/post_report.php', JSON.stringify(uploadData));
+                        
+                        if(response.data.status == true){
+                            // DO DELETE LOCAL DATA
+                            const newListReportUpload = tempItem.filter(v => v != itemUpload);
+                            const newListReportItem = tempItem.filter(v => v != headerLocal);
+                            tempItem = [ ...newListReportItem, {...headerLocal, listReportUpload: newListReportUpload} ];
+
+                            await AsyncStorage.setItem('localReportItem', JSON.stringify(tempItem));
+                        }
+                        console.log('================');
+                        console.log(response.data);
+                    });
+                })
+                .catch((res) => {
+                    Alert.alert('Info', 'Failed sync to baf_log, please try again later');
+                });
+
+            tempItem.map(async item => {
+                if(item.listReportUpload.length == 0){
+                    // DO DELETE LOCAL DATA
+                    const newListReportItem = localReportItem.filter(v => v != headerLocal);
+                    tempItem = newListReportItem;
+
+                    await AsyncStorage.setItem('localReportItem', JSON.stringify(newListReportItem));
                 }
-                // formData.append('photo', image);
+            })
 
-                const response = await easymoveinApi.post('/post_report.php', JSON.stringify(uploadData));
-
-                console.log('================');
-                console.log(response.data);
-            });
+            dispatch({ type: 'REPORT_SET_LOCAL_LIST_ITEM', payload: tempItem });
         })
     } catch (error) {
         console.log(error);
@@ -250,23 +310,33 @@ const doPostReport = dispatch => async (val) => {
 
 const doPostResolve = dispatch => async (val) => {
     try {
+        dispatch({ type: 'REPORT_SET_LOADING', payload: true });
         const localResolvedReport = JSON.parse(await AsyncStorage.getItem('localResolvedReport')) || [];
+        let tempItem = localResolvedReport;
 
-        await localResolvedReport.map(async u => {
-            const photo = u.photo || '';
+        await localResolvedReport.map(async headerLocal => {
+            const photo = headerLocal.photo || '';
             const base64 = await FileSystem.readAsStringAsync(photo, { encoding: 'base64' });
 
             const uploadData = {
-                data: { ...u, id_report: u.idReport },
+                data: { ...headerLocal, id_report: headerLocal.idReport },
                 photo: base64
             }
             // formData.append('photo', image);
 
             const response = await easymoveinApi.post('/post_resolve.php', JSON.stringify(uploadData));
+            if(response.data.status == true){
+                // DO DELETE LOCAL DATA
+                const newListReportItem = tempItem.filter(v => v != headerLocal);
+                tempItem = [ ...newListReportItem ];
 
+                await AsyncStorage.setItem('localResolvedReport', JSON.stringify(tempItem));
+            }
             console.log('================');
             console.log(response.data);
         });
+
+        dispatch({ type: 'REPORT_SET_LOCAL_LIST_RESOLVED', payload: tempItem });
     } catch (error) {
         console.log(error);
         // processError(error);
@@ -297,8 +367,8 @@ const defaultList = {
 
 export const { Provider, Context} = createDataContext(
     reportReducer,
-    { doPostReport, doPostResolve, fetchAsset, fetchComplaint, getReportState, addReportItem, addReportResolve, addScanItem, addUploadItem, setCurrentZone, setCurrentScan, resetReportScan, resetReportTemp, deleteScanItem, localToState },
+    { doPostReport, doPostResolve, fetchAsset, fetchComplaint, fetchLog, getReportState, addReportItem, addReportResolve, addScanItem, addUploadItem, setCurrentZone, setCurrentScan, resetReportScan, resetReportTemp, deleteScanItem, localToState },
 
     // default state reduce
-    { loading: false, listAsset: [], listComplaint: [], listReportItem: [], listReportResolve: [], listReportUpload: [], listReportScan: [], currentReportAsset:[], currentReportZone: {}, currentReportScan: {} }
+    { loading: false, listAsset: [], listComplaint: [], listLog: [], listReportItem: [], listReportResolve: [], listReportUpload: [], listReportScan: [], currentReportAsset:[], currentReportZone: {}, currentReportScan: {} }
 )

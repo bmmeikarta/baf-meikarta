@@ -81,9 +81,11 @@ const ContainerImagePicker = ({category, problem, idAsset, assetQR }) => {
               <View style={styles.detailCol}>
                   <Text>{'Foto'}</Text>
                   {pickedImage &&
+                  <TouchableWithoutFeedback onPress={takeImageHandler}>
                     <View style={styles.imagePicker}>
                         <Image style={{ width: 70, height: 70 }} source={{ uri: pickedImage }}></Image>
                     </View>
+                  </TouchableWithoutFeedback>
                   }
                   {!pickedImage &&
                     <TouchableWithoutFeedback onPress={takeImageHandler}>

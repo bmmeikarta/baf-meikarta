@@ -1,12 +1,12 @@
 import React, { useContext, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View, Image } from "react-native";
 import { Text, Button } from "react-native-elements";
 import RegularImagePicker from "../components/RegularImagePicker";
 import { Context as ReportContext } from "../context/ReportContext";
 
 const ResolveFormScreen = ({navigation}) => {
     const { addReportResolve } = useContext(ReportContext);
-    const { idx, blocks, tower, category,  zone, qrcode, problem } = navigation.state.params;
+    const { idx, blocks, tower, category,  zone, qrcode, problem, photo_after, photo_before, status } = navigation.state.params;
     const [listResolve, setListResolve] = useState({
         idReport: null,
         photo: ''
@@ -18,9 +18,10 @@ const ResolveFormScreen = ({navigation}) => {
 
     const onSubmit = () => {
         addReportResolve(listResolve);
-        navigation.navigate('Home');
+        navigation.goBack();
     }
 
+    const isResolved = status == 'RESOLVED';
     return (<>
         <ScrollView style={styles.screen}>
             <View style={styles.containerHeader}>
@@ -44,19 +45,41 @@ const ResolveFormScreen = ({navigation}) => {
                     <View style={styles.containerLabel}><Text style={[styles.text]}>Problem</Text></View>
                     <View><Text style={[styles.text]}>: {problem}</Text></View>
                 </View>
+            </View>
+
+            <View style={{backgroundColor: 'white', padding: 10}}>
+                <View style={styles.row}>
+                    <View style={styles.containerLabel}><Text style={[styles.text]}>Photo Before</Text></View>
+                    <View><Text style={[styles.text]}>:</Text></View>
+                </View>
+            </View>
+            <View style={{ alignSelf: 'center' }}>
+                <View style={styles.imagePicker}>
+                    <Image style={{ width: 200, height: 200 }} source={{ uri: 'https://easymovein.id/save_baf/' + photo_before }}></Image>
+                </View>
+            </View>
+
+            <View style={{backgroundColor: 'white', padding: 10}}>
                 <View style={styles.row}>
                     <View style={styles.containerLabel}><Text style={[styles.text]}>Photo After</Text></View>
                     <View><Text style={[styles.text]}>:</Text></View>
                 </View>
             </View>
             <View style={{ alignSelf: 'center' }}>
-                <RegularImagePicker idReport={idx} onTakingImage={onTakingImage} size={280}/>
+                {isResolved &&
+                    <View style={styles.imagePicker}>
+                        <Image style={{ width: 200, height: 200 }} source={{ uri: photo_after }}></Image>
+                    </View>
+                }
+                {!isResolved &&
+                    <RegularImagePicker idReport={idx} onTakingImage={onTakingImage} size={280}/>
+                }
             </View>
             <View style={{ marginTop: 20, marginBottom: 30 }}>
                 <Button 
-                    buttonStyle={styles.button}
-                    title="Submit"
-                    onPress={() => onSubmit()}
+                    buttonStyle={[styles.button, { backgroundColor: `${isResolved ? '#41db30':'#24a0ed'}`}]}
+                    title={ isResolved ? 'RESOLVED':'SUBMIT'}
+                    onPress={() => !isResolved ? onSubmit():null}
                 />
             </View>
             
@@ -101,6 +124,15 @@ const styles = StyleSheet.create({
         width: "100%",
         height: 50,
         alignSelf: "center",
+    },
+    imagePicker: {
+        margin: 10,
+        borderWidth: 1,
+        borderStyle: "dashed",
+        borderColor: "#b8b8b8",
+        borderRadius: 5,
+        justifyContent: "center",
+        alignItems: "center",
     },
 });
 

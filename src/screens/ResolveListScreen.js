@@ -41,14 +41,15 @@ const ResolveListScreen = ({ navigation }) => {
           {dataUnit.map((v, key) => {
 
             const statusFloor = getStatusFloor(userDetail, currentShift, schedulePattern, v.blocks, v.floor);
-            const isAnyComplaint = listComplaint.filter(c => c.blocks == v.blocks && c.tower == v.tower && c.floor == v.floor && c.status == 'REPORTED');
+            const floorComplaint = listComplaint.filter(c => c.blocks == v.blocks && c.tower == v.tower && c.floor == v.floor);
+            const isAnyComplaint = floorComplaint.filter(c => c.status == 'REPORTED');
 
             let bgFloor = '#000';
             // if(statusFloor == 'active') bgFloor = '#6598eb';
-            if(statusFloor == 'on progress' || isAnyComplaint.length > 0) bgFloor = '#bd0f0f';
-            if(statusFloor == 'done') bgFloor = '#41db30';
+            if(isAnyComplaint.length > 0) bgFloor = '#bd0f0f'; // MERAH
+            if(floorComplaint.length > 0 && isAnyComplaint.length == 0) bgFloor = '#41db30'; // HIJAU
 
-            const canAccess = statusFloor == 'active' || statusFloor == 'on progress' || isAnyComplaint.length > 0;
+            const canAccess = isAnyComplaint.length > 0 || floorComplaint.length > 0;
             
             return <View key={key} style={styles.container}>
               <Button 

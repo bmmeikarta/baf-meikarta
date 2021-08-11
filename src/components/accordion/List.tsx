@@ -26,7 +26,7 @@ interface ListProps {
   list: List;
 }
 
-const List = ({ navigation, list }) => {
+const List = ({ navigation, list, category, onPressCheckList }) => {
   const aref = useAnimatedRef<View>();
   const arefChild = useAnimatedRef<View>();
   const open = useSharedValue(false);
@@ -63,6 +63,7 @@ const List = ({ navigation, list }) => {
               onPress={() => {
                 checkmark.value = !checkmark.value;
                 open.value = false;
+                onPressCheckList({ category, checkmark: true });
               }}
             >
               <Animated.View style={{marginRight: 30}}>
@@ -79,6 +80,7 @@ const List = ({ navigation, list }) => {
                 
                 open.value = !open.value;
                 checkmark.value = false;
+                onPressCheckList({ category, checkmark: false });
               }}
             >
               <Animated.View>
