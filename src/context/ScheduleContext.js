@@ -137,7 +137,7 @@ const getCurrentShift = dispatch => async (x) => {
     let shift = userDetail.data.shift;
 
     const hourNow = moment().format('H');
-    if([21,14,12].includes(job) == false) job = 12; // DEFAULT CSO 
+    // if([21,14,12].includes(job) == false) job = 12; // DEFAULT CSO 
 
     if(!shift){
         if(hourNow >= 8 && hourNow < 15) shift = 1;
@@ -167,7 +167,7 @@ const getActiveFloor = dispatch => async(currentShift, schedulePattern, blocks) 
     
     let job = userDetail.data.profile_id;
 
-    if([21,14,12].includes(job) == false) job = 12; // DEFAULT CSO 
+    // if([21,14,12].includes(job) == false) job = 12; // DEFAULT CSO 
 
     // untuk dapat jam ke berapa dr shift tsb, 
     // e.g. jam ke 1 dari shift
@@ -179,7 +179,7 @@ const getActiveFloor = dispatch => async(currentShift, schedulePattern, blocks) 
         jamKe = parseInt(hourNow) + 1;
     }
 
-    const activeBlock = schedulePattern.find(v => v.block == block && v.job == job) || {};
+    const activeBlock = (schedulePattern || []).find(v => v.block == block && v.job == job) || {};
     const blockPattern = activeBlock.patterns || [];
     const activeFloor = blockPattern['pattern_' + jamKe] || '';
     const activeIDX = activeFloor.split(',');

@@ -76,8 +76,7 @@ export const getStatusFloor = (userDetail, currentShift, schedulePattern, blocks
     const { listReportItem, listLog } = reportState;
 
     let job = ((userDetail || {}).data || {}).profile_id;
-    
-    if([21,14,12].includes(job) == false) job = 12; // DEFAULT CSO
+    // if(['21','14','12'].includes(job) === false) job = 12;
     
     // untuk dapat jam ke berapa dr shift tsb, 
     // e.g. jam ke 1 dari shift
@@ -88,8 +87,8 @@ export const getStatusFloor = (userDetail, currentShift, schedulePattern, blocks
     if(currentShift.end < currentShift.start && hourNow < currentShift.start){
         jamKe = parseInt(hourNow) + 1;
     }
-
-    const activeBlock = schedulePattern.find(v => v.block == blocks && v.job == job) || {};
+    
+    const activeBlock = (schedulePattern || []).find(v => v.block == blocks && v.job == job) || {};
     const blockPattern = activeBlock.patterns || [];
     const activeFloor = blockPattern['pattern_' + jamKe] || '';
     const activeIDX = activeFloor.split(',');
