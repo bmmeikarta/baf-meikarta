@@ -14,7 +14,16 @@ import _ from "lodash";
 const HomeScreen = ({ navigation }) => {
     const { state: authState } = useContext(AuthContext);
     const { fetchSchedule, fetchSchedulePattern, getCurrentShift } = useContext(ScheduleContext);
-    const { state, localToState, fetchAsset, fetchComplaint, fetchLog, doPostReport, doPostResolve } = useContext(ReportContext);
+    const { 
+        state, 
+        localToState, 
+        fetchAsset, 
+        fetchComplaint, 
+        fetchLog,
+        fetchCategory,
+        doPostReport, 
+        doPostResolve 
+    } = useContext(ReportContext);
     
     const { loading, lastUpdateDB, listAsset, testVal, listReportItem, listReportResolve, listComplaint } = state;
     const { userDetail } = authState;
@@ -24,38 +33,46 @@ const HomeScreen = ({ navigation }) => {
     const countNotSync = listReportResolve.length + listReportItem.length;
     const countNotResolve = listComplaint.filter(v => v.status == 'REPORTED').length;
 
-    const exampleData = [{
-        "blocks": "51022",
-        "floor": "27",
-        "listReportUpload": [
-         {
-            "category": "Kebersihan",
-            "id_asset": null,
-            "photo_before": "file:///storage/emulated/0/DCIM/5638efa4-cfa1-4d2f-a13e-a587751243e7.jpg",
-            "problem": null,
-            "qrcode": null,
-          },
-        ],
-        "tower": "1B",
-        "zone": 1,
-      },
+    const exampleData = [
         {
-        "blocks": "51022",
-        "floor": "27",
-        "listReportUpload": [
-          {
-            "category": "Keamanan",
-            "id_asset": null,
-            "photo_before": "file:///storage/emulated/0/DCIM/cfedea29-e4b7-480b-afbd-dff7899fe8bc.jpg",
-            "problem": "Pengerusakan Assets / Grafiti",
-            "qrcode": null,
-          },
-        ],
-        "tower": "1B",
-        "zone": 2,
-      }];
+          "blocks": "51022",
+          "created_at": "2021-08-16 06:54:45",
+          "created_by": "121",
+          "floor": "30",
+          "listReportUpload": [
+            {
+              "category": "Kebersihan",
+              "id_asset": null,
+              "photo_before": "file:///storage/emulated/0/DCIM/36e0c499-b2a8-45a0-a716-0112ab18cf58.jpg",
+              "problem": null,
+              "qrcode": null,
+              "sku_code": "1",
+            },
+            {
+              "category": "Keamanan",
+              "id_asset": "7856",
+              "photo_before": "file:///storage/emulated/0/DCIM/912ab304-2b1b-4a38-9d84-24489e33f8f7.jpg",
+              "problem": "Object Hilang / Pencurian",
+              "qrcode": "BAF007379",
+              "sku_code": "2.1.2",
+            },
+            {
+              "category": "Keamanan",
+              "id_asset": null,
+              "photo_before": "file:///storage/emulated/0/DCIM/cf7d4417-9afd-4643-b832-0b3eeb133443.jpg",
+              "problem": "Pelanggaran Ketertiban Penghuni",
+              "qrcode": null,
+              "sku_code": "2.3",
+            },
+          ],
+          "shift_id": "1",
+          "tower": "1B",
+          "zone": 1,
+        },
+      ];
     
     const fetchLocalReportItem = async() => {
+        // await AsyncStorage.setItem('localReportItem', JSON.stringify(exampleData));
         // await AsyncStorage.removeItem('localReportItem');
         // await AsyncStorage.removeItem('localResolvedReport');
         const local = await AsyncStorage.getItem('localReportItem');
@@ -65,9 +82,9 @@ const HomeScreen = ({ navigation }) => {
         // navigation.setParams({ localReport: state.listReportItem, doPostReport: doPostReport });
         // console.log('HOME ', state.listReportItem);
         // console.log('LOCAL ', JSON.parse(local));
-        console.log('RESOLVED ', JSON.parse(localResolvedReport));
+        // console.log('RESOLVED ', JSON.parse(localResolvedReport));
         // console.log('LOG ', JSON.parse(serverLog));
-        console.log('COMPLAINT ', JSON.parse(serverComplaint));
+        // console.log('COMPLAINT ', JSON.parse(serverComplaint));
     }
 
     const onSyncData = async () => {
@@ -75,6 +92,7 @@ const HomeScreen = ({ navigation }) => {
             if (isConnected) {
                 await fetchLog();
                 await fetchComplaint();
+                await fetchCategory();
                 await fetchLocalReportItem();
                 // await addReportItem(exampleData[0]);
                 await fetchAsset();
@@ -84,7 +102,7 @@ const HomeScreen = ({ navigation }) => {
 
                 await localToState();
                 await doPostReport();
-                await doPostResolve();
+                // await doPostResolve();
             } else {
                 Alert.alert("Oopss..", "Sorry you're offline now, please sync your data later");
             }

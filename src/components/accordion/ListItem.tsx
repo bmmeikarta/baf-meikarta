@@ -113,7 +113,7 @@ const ListItem = ({ navigation, category, question, isLast }) => {
 
       {/* JIKA TIDAK ADA CHILD, MAKA LANGSUNG AMBIL FOTO AJA */}
       {question.items.length == 0 && 
-        <ContainerImagePicker assetQR={null} idAsset={null} category={category} problem={question.label}/>
+        <ContainerImagePicker assetQR={null} idAsset={null} category={category} problem={question.label} sku_code={question.sku_code}/>
       }
 
       {/* JIKA ADA CHILD, TAMPILKAN ITEM UNTUK DI SCAN */}

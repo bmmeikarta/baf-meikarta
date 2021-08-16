@@ -101,7 +101,7 @@ const List = ({ navigation, list, category, onPressCheckList }) => {
 
           {/* JIKA TIDAK ADA CHILD, MAKA LANGSUNG AMBIL FOTO AJA */}
           {list.questions.length == 0 && 
-            <ContainerImagePicker assetQR={null} idAsset={null} category={list.title} problem={null}/>
+            <ContainerImagePicker assetQR={null} idAsset={null} sku_code={list.sku_code} category={list.title} problem={null}/>
           }
 
           {/* JIKA ADA CHILD, TAMPILKAN ITEM UNTUK DI SCAN */}

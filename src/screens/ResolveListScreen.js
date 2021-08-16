@@ -40,7 +40,7 @@ const ResolveListScreen = ({ navigation }) => {
 
           {dataUnit.map((v, key) => {
 
-            const statusFloor = getStatusFloor(userDetail, currentShift, schedulePattern, v.blocks, v.floor);
+            const statusFloor = getStatusFloor(v.blocks, v.floor, v.tower);
             const floorComplaint = listComplaint.filter(c => c.blocks == v.blocks && c.tower == v.tower && c.floor == v.floor);
             const isAnyComplaint = floorComplaint.filter(c => c.status == 'REPORTED');
 

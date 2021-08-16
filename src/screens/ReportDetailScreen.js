@@ -8,86 +8,9 @@ import List, { List as ListModel } from "../components/accordion/List";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import _ from "lodash";
 
-const listKebersihan = {
-  title: "Kebersihan",
-  questions: [],
-};
-
-const listKeamanan = {
-  title: "Keamanan",
-  questions: [
-    { 
-      label: "Object Hilang / Pencurian",
-      items: [
-        { name: 'APAR', status: '' },
-        { name: 'Lampu Lorong', status: '' },
-        { name: 'Sprinkler', status: '' },
-        { name: 'Smoke Detector', status: '' },
-        { name: 'Speaker', status: '' },
-        { name: 'Hydrant', status: '' },
-        { name: 'CCTV', status: '' },
-        { name: 'Building / Exit Signage', status: '' },
-        { name: 'Lampu TL Emergency Exit', status: '' },
-      ]
-    },
-    { 
-      label: "Personel Mencurigakan",
-      items: []
-    },
-    { 
-      label: "Pelanggaran Ketertiban Penghuni",
-      items: []
-    },
-    { 
-      label: "Pengerusakan Assets / Grafiti",
-      items: []
-    },
-  ],
-};
-
-const listFungsional = {
-  title: "Fungsional",
-  questions: [
-    { 
-      label: "Object Rusak",
-      items: [
-        { name: 'APAR', status: '' },
-        { name: 'Lampu Lorong', status: '' },
-        { name: 'Sprinkler', status: '' },
-        { name: 'Smoke Detector', status: '' },
-        { name: 'Speaker', status: '' },
-        { name: 'Hydrant', status: '' },
-        { name: 'CCTV', status: '' },
-        { name: 'Building / Exit Signage', status: '' },
-        { name: 'Lampu TL Emergency Exit', status: '' },
-      ]
-    },
-    { 
-      label: "Others",
-      items: []
-    },
-  ],
-};
-
-const styles = StyleSheet.create({
-  screen: {
-    paddingVertical: 20,
-    paddingHorizontal: 10,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-  },
-  button: {
-    width: "100%",
-    height: 50,
-    alignSelf: "center",
-},
-});
-
 const ReportDetailScreen = ({ navigation }) => {
   const { state, getReportState, addReportItem } = useContext(ReportContext);
-  const { currentReportZone, currentReportAsset, listReportScan, listReportUpload } = state;
+  const { currentReportZone, currentReportAsset, listReportScan, listReportUpload, listCategory } = state;
   const { headerTitle } = navigation.state.params;
   const [checkList, setCheckList] = useState([]);
 
@@ -141,9 +64,14 @@ const ReportDetailScreen = ({ navigation }) => {
       />
       <ScrollView style={styles.screen}>
         <Text style={{fontSize: 24, fontWeight: 'bold'}}>{headerTitle}</Text>
-        <List onPressCheckList={onPressCheckList} navigation={navigation} category={`kebersihan`} list={listKebersihan} />
+        {
+          listCategory.map(list => {
+            return <List key={list.title} onPressCheckList={onPressCheckList} navigation={navigation} category={list.title} list={list} />
+          })
+        }
+        {/* <List onPressCheckList={onPressCheckList} navigation={navigation} category={`kebersihan`} list={listKebersihan} />
         <List onPressCheckList={onPressCheckList} navigation={navigation} category={`keamanan`} list={listKeamanan} />
-        <List onPressCheckList={onPressCheckList} navigation={navigation} category={`fungsional`} list={listFungsional} />
+        <List onPressCheckList={onPressCheckList} navigation={navigation} category={`fungsional`} list={listFungsional} /> */}
         <View style={{ marginTop: 20 }}>
           <Button 
               buttonStyle={styles.button}
@@ -156,5 +84,21 @@ const ReportDetailScreen = ({ navigation }) => {
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  screen: {
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: "bold",
+  },
+  button: {
+    width: "100%",
+    height: 50,
+    alignSelf: "center",
+  },
+});
 
 export default ReportDetailScreen;

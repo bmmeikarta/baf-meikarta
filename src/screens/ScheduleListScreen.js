@@ -8,15 +8,17 @@ import { Context as ReportContext } from '../context/ReportContext';
 import { navigate } from "../navigationRef";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import jwtDecode from "jwt-decode";
+import _ from "lodash";
 
 const ScheduleListScreen = ({ navigation, showActiveOnly, parentComponent }) => {
     const { state: authState } = useContext(AuthContext);
     const { state, fetchSchedule, fetchSchedulePattern, getCurrentShift } = useContext(ScheduleContext);
     const { master_unit, currentShift, schedulePattern } = state;
     const { userDetail } = authState;
-    
-
-    const dataUnit = (master_unit || []);
+    const uniqTower = _.uniq(_.map(master_unit, 'tower')) || [];
+    const defaultTower = uniqTower[0] || '';
+    const [activeTower, setActiveTower] = useState(defaultTower);
+    const dataUnit = (master_unit || []).filter(v => v.tower == activeTower);
     // if(Object.keys(currentShift).length == 0){
     //     return (<>
     //         <NavigationEvents onWillFocus={getCurrentShift} />
@@ -25,7 +27,6 @@ const ScheduleListScreen = ({ navigation, showActiveOnly, parentComponent }) => 
     //         </View>
     //     </>)
     // }
-
     return (
     <>
         <NavigationEvents onWillFocus={() => {
@@ -38,8 +39,18 @@ const ScheduleListScreen = ({ navigation, showActiveOnly, parentComponent }) => 
             { dataUnit.length > 0 &&
                 <Text style={styles.textBlockName}>{dataUnit[0].blocks}</Text>
             }
+            <View style={{ marginBottom: 20, flexDirection: 'row', justifyContent: "center", }}>
+                {
+                    uniqTower.map(tower => {
+                        let bgFilter = 'white';
+                        if(tower == activeTower) bgFilter = 'orange'; 
+                        if(tower) return <TouchableOpacity key={tower} onPress={() => setActiveTower(tower)} style={[styles.filterTower, { backgroundColor: `${bgFilter}`}]}><Text style={styles.textTimer}>{tower}</Text></TouchableOpacity >
+                    })
+                }
+            </View>
+            
             <View style={styles.header}>
-                <View style={[styles.items, { backgroundColor: 'orange' }]}><Text style={styles.textStyle}>1B</Text></View>
+                <View style={[styles.items, { backgroundColor: 'orange' }]}><Text style={styles.textStyle}></Text></View>
                 <View style={[styles.items, { backgroundColor: '#ff9cf5' }]}><Text style={styles.textStyle}>Zone 1</Text></View>
                 <View style={[styles.items, { backgroundColor: '#ff9cf5' }]}><Text style={styles.textStyle}>Zone 2</Text></View>
                 <View style={[styles.items, { backgroundColor: '#ff9cf5' }]}><Text style={styles.textStyle}>Zone 3</Text></View>
@@ -48,7 +59,7 @@ const ScheduleListScreen = ({ navigation, showActiveOnly, parentComponent }) => 
             <View style={{ paddingBottom: 20 }}>
                 {
                     (dataUnit || []).map((datum, idx) => { // This will render a row for each data element.
-                        const statusFloor = getStatusFloor(userDetail, currentShift, schedulePattern, datum.blocks, datum.floor);
+                        const statusFloor = getStatusFloor(datum.blocks, datum.floor, datum.tower);
                         const floorName = datum.blocks + ' - ' + datum.floor;
 
                         if(showActiveOnly && statusFloor != 'active') return false;
@@ -71,36 +82,39 @@ const ScheduleListScreen = ({ navigation, showActiveOnly, parentComponent }) => 
     )
 };
 
-export const getStatusFloor = (userDetail, currentShift, schedulePattern, blocks, floor) => {
+export const getStatusFloor = (blocks, floor, tower) => {
     const { state: reportState } = useContext(ReportContext);
-    const { listReportItem, listLog } = reportState;
+    const { state: authState } = useContext(AuthContext);
+    const { state: scheduleState } = useContext(ScheduleContext);
+    const { schedulePattern, currentShift } = scheduleState;
+    const { userDetail } = authState;
+    const { listLog } = reportState;
 
+    if(!currentShift.start) return 'future';
+    
     let job = ((userDetail || {}).data || {}).profile_id;
     // if(['21','14','12'].includes(job) === false) job = 12;
     
     // untuk dapat jam ke berapa dr shift tsb, 
     // e.g. jam ke 1 dari shift
     const hourNow = moment().format('H');
-    let jamKe = (hourNow - currentShift.start) + 1;
     
-    // to handle shift 3
-    if(currentShift.end < currentShift.start && hourNow < currentShift.start){
-        jamKe = parseInt(hourNow) + 1;
-    }
-    
-    const activeBlock = (schedulePattern || []).find(v => v.block == blocks && v.job == job) || {};
+    const activeBlock = (schedulePattern || []).find(v => v.block == blocks && v.job == 12) || {};
     const blockPattern = activeBlock.patterns || [];
-    const activeFloor = blockPattern['pattern_' + jamKe] || '';
+    const activeFloor = blockPattern[hourNow] || '';
     const activeIDX = activeFloor.split(',');
+    const floorTower = floor + '_' + tower;
 
     let inactiveFloor = '';
-    for(let i=1; i < jamKe; i++){
-        const floors = blockPattern['pattern_' + i] || '';
+    for(let i=0; i < hourNow; i++){
+        const floors = blockPattern[i] || '';
         inactiveFloor += floors + ',';
     }
+
     const floorSkippedIDX = inactiveFloor.split(',');
+    const canAccess = floorSkippedIDX.includes(floorTower) || activeIDX.includes(floorTower);
+    
     const checkZoneReport = listLog.filter(v => v.blocks == blocks && v.floor == floor);
-    const canAccess = floorSkippedIDX.includes(floor.toString()) || activeIDX.includes(floor.toString());
     
     if(checkZoneReport.length > 0 && checkZoneReport.length < 4 && canAccess) return 'on progress';
     if(checkZoneReport.length == 4) return 'done';
@@ -170,7 +184,7 @@ export const Timer = ({label, getCurrentShift}) => {
     return (
         <View style={styles.containerTimer}>
             <Text style={[styles.textTimer, { marginBottom: 5 }]}>{label || 'Next Schedule In'}</Text>
-            <View style={{ alignSelf: 'center', backgroundColor: '#2fc2b8', paddingVertical: 5, paddingHorizontal: 10, borderRadius: 5 }}>
+            <View style={styles.timer}>
                 <Text style={styles.textTimer}>{timeLeft}</Text>
             </View>
         </View>
@@ -220,6 +234,18 @@ const styles = StyleSheet.create({
         textAlign: 'center', 
         fontWeight: 'bold', 
         fontSize: 16 
+    },
+    timer: { alignSelf: 'center', backgroundColor: '#2fc2b8', paddingVertical: 5, paddingHorizontal: 10, borderRadius: 5 },
+    filterTower: {
+        backgroundColor: 'white',
+        borderColor: 'orange',
+        borderWidth: 1,
+        alignSelf: 'center', 
+        paddingVertical: 5, 
+        paddingHorizontal: 10, 
+        borderRadius: 5,
+        width: 70,
+        marginHorizontal: 5
     }
 });
 

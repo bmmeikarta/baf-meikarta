@@ -63,7 +63,7 @@ const ListChildItem = ({ navigation, category, problem, item, isLast }) => {
       {/* JIKA TIDAK ADA CHILD, MAKA LANGSUNG AMBIL FOTO AJA */}
       {dataScan && dataScan.scan_item.length > 0 && 
         dataScan.scan_item.map((s, key) => (
-          <ContainerImagePicker key={key} assetQR={s.qrcode} idAsset={s.id_asset} category={category} problem={problem}/>
+          <ContainerImagePicker key={key} assetQR={s.qrcode} sku_code={item.sku_code} idAsset={s.id_asset} category={category} problem={problem}/>
         ))
       }
     </>);

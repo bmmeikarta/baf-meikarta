@@ -6,6 +6,7 @@ import { Alert } from "react-native";
 import { navigate } from "../navigationRef";
 import moment from "moment";
 import jwtDecode from "jwt-decode";
+import _, { concat } from "lodash";
 
 const scheduleReducer = (state, action) => {
     switch (action.type) {
@@ -28,7 +29,7 @@ const mapWorkHour = [
         work_hour: [
             {
                 shift: 1,
-                start: 8,
+                start: 6,
                 end: 15
             },
             {
@@ -82,6 +83,7 @@ const mapWorkHour = [
 ];
 
 const processError = (error) => {
+    console.log(error);
     if(error.response.status == 401){
         Alert.alert('Authorization Failed', 'Silahkan melakukan login kembali', [
             { 
@@ -110,18 +112,19 @@ const fetchSchedule = dispatch => async () => {
         const userDetail = jwtDecode(token);
         
         const block = userDetail.data.absensi_block || '51022';
-        const tower = '1B';
-
-        const response = await easymoveinApi.get('/get_schedule.php?block='+ block +'&tower=' + tower);
+        
+        const response = await easymoveinApi.get('/get_schedule.php?block='+ block);
         const data = response.data || [];
         const masterUnit = data.master_unit || [];
+        const uniqTower = _.uniq(_.map(masterUnit, 'tower'));
 
-        const concatData = [
-            { blocks: masterUnit[0].blocks, block_name: masterUnit[0].block_name, floor: 'Rooftop', tower: masterUnit[0].tower },
-            { blocks: masterUnit[0].blocks, block_name: masterUnit[0].block_name, floor: 'Lobby', tower: masterUnit[0].tower }
-        ]
-
-        data.master_unit = data.master_unit.concat(concatData);
+        uniqTower.map(tower => {
+            const concatData = [
+                { blocks: masterUnit[0].blocks, block_name: masterUnit[0].block_name, floor: 'Rooftop', tower: tower },
+                { blocks: masterUnit[0].blocks, block_name: masterUnit[0].block_name, floor: 'Lobby', tower: tower }
+            ];
+            data.master_unit = data.master_unit.concat(concatData);
+        });
         
         dispatch({ type: 'SCHEDULE_FETCH', payload: data });
     } catch (error) {
@@ -135,7 +138,7 @@ const getCurrentShift = dispatch => async (x) => {
     
     let job = parseInt(userDetail.data.profile_id); // TODO: get from profile
     let shift = userDetail.data.shift;
-
+    console.log(shift)
     const hourNow = moment().format('H');
     // if([21,14,12].includes(job) == false) job = 12; // DEFAULT CSO 
 

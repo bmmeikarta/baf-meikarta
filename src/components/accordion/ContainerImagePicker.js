@@ -8,7 +8,7 @@ import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import { Context as ReportContext } from '../../context/ReportContext';
 
-const ContainerImagePicker = ({category, problem, idAsset, assetQR }) => {
+const ContainerImagePicker = ({category, problem, idAsset, assetQR, sku_code }) => {
     const { state, addUploadItem } = useContext(ReportContext);
     const { listReportUpload } = state;
 
@@ -17,6 +17,7 @@ const ContainerImagePicker = ({category, problem, idAsset, assetQR }) => {
         category: category,
         problem,
         id_asset: idAsset,
+        sku_code,
         qrcode: assetQR
     });
     
