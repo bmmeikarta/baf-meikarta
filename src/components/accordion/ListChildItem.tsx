@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useContext, useState } from "react";
-import { StyleSheet, Text, View, TouchableWithoutFeedback } from "react-native";
+import { StyleSheet, Text, View, TouchableWithoutFeedback, Alert } from "react-native";
 import Animated, {
   useAnimatedRef,
   measure,
@@ -30,12 +30,21 @@ interface ListItemProps {
 
 const ListChildItem = ({ navigation, category, problem, item, isLast }) => {
     const { state, setCurrentScan } = useContext(ReportContext);
-    const { currentReportZone, currentReportScan, listReportScan } = state;
+    const { currentReportZone, currentReportScan, listReportScan, listPendingReport } = state;
     const dataScan = (listReportScan || []).find(v => v.category == category && v.problem == problem && v.item_name == item.name);
 
     const bottomRadius = isLast ? 8 : 0;
 
     const onClickScan = (itemName) => {
+      const isPending = listPendingReport.find(v => v.blocks == currentReportZone.blocks 
+        && v.tower == currentReportZone.tower && v.floor == currentReportZone.floor 
+        && v.zone == currentReportZone.zone && v.category == category && v.problem == problem && v.item_name.toLowerCase() == item.name.toLowerCase()
+      );
+
+      if(isPending){
+        Alert.alert('Info', 'Sorry, this item has been reported and not yet resolved');
+        return
+      }
       setCurrentScan({ ...currentReportZone, category, problem, item_name: itemName })
       navigation.navigate('ReportScanner')
     }

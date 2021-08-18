@@ -29,7 +29,7 @@ const mapWorkHour = [
         work_hour: [
             {
                 shift: 1,
-                start: 6,
+                start: 8,
                 end: 15
             },
             {
@@ -138,7 +138,7 @@ const getCurrentShift = dispatch => async (x) => {
     
     let job = parseInt(userDetail.data.profile_id); // TODO: get from profile
     let shift = userDetail.data.shift;
-    console.log(shift)
+    // console.log(shift)
     const hourNow = moment().format('H');
     // if([21,14,12].includes(job) == false) job = 12; // DEFAULT CSO 
 
@@ -159,7 +159,7 @@ const getCurrentShift = dispatch => async (x) => {
 
                                 return v.shift == shift && (hourNow >= v.start && hourNow < v.end)
                             }) || {};
-    
+    console.log(currentShift, job, shift);
     dispatch({ type: 'SCHEDULE_CURRENT_SHIFT', payload: currentShift });
 }
 

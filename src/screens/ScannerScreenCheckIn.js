@@ -10,7 +10,7 @@ import moment from 'moment';
 import jwtDecode from 'jwt-decode';
 
 const ScannerScreen = ({ navigation }) => {
-    const { zone } = navigation.state.params;
+    const { headerTitle, zone } = navigation.state.params;
     
     const [hasPermission, setHasPermission] = useState(null);
     const [scanned, setScanned] = useState(false);
@@ -73,7 +73,7 @@ const ScannerScreen = ({ navigation }) => {
     // const checkAsset = currentReportAsset.find(v => v.qrcode == data && v.remark.toLowerCase() == ('Zone ' + zone).toLowerCase());
     // if(!checkAsset) return alertError(`Wrong QR Code for Zone ${zone}`);
 
-    navigation.goBack();
+    navigation.navigate('ReportDetail', { headerTitle });
   };
 
   // Check permissions and return the screens

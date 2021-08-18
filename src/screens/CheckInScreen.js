@@ -4,16 +4,28 @@ import { Button } from "react-native-elements";
 import { Timer, getStatusFloor } from "./ScheduleListScreen";
 import { NavigationEvents } from "react-navigation";
 import { Context as ScheduleContext } from '../context/ScheduleContext';
+import { Context as AuthContext } from '../context/AuthContext';
+import { Context as ReportContext } from '../context/ReportContext';
 import moment from "moment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const CheckInScreen = ({ navigation }) => {
   const { getCurrentShift } = useContext(ScheduleContext);
+  const { state: authState } = useContext(AuthContext);
+  const { setCurrentZone } = useContext(ReportContext);
+  const { userDetail } = authState;
   const [listCheckIn, setListCheckIn] = useState([]);
 
   const localToState = async () => {
     const localCheckIn = JSON.parse(await AsyncStorage.getItem('localCheckIn')) || [];
     setListCheckIn(localCheckIn);
+  }
+  
+  const onChooseZone = async (zone) => {
+    const hour = moment().format('HH');
+    const floorName = userDetail.data.absensi_block + ' - Danru - Zone ' + zone;
+    await setCurrentZone({blocks: userDetail.data.absensi_block, tower: 'Danru', floor: 'Danru ' + hour, zone});
+    navigation.navigate('CheckInScanner', { zone, headerTitle: floorName })
   }
   // console.log('REPORT LIST ', reportState);
   return (
@@ -38,7 +50,7 @@ const CheckInScreen = ({ navigation }) => {
             return <View key={key} style={styles.container}>
               <Button 
                 buttonStyle={{ backgroundColor: `${bgFloor}` }}
-                onPress={() => canAccess ? navigation.navigate('CheckInScanner', { zone }) : null}
+                onPress={() => canAccess ? onChooseZone(zone) : null}
                 title={zone}
               />
             </View>

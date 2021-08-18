@@ -18,6 +18,8 @@ const reportReducer = (state, action) => {
             return { ...state, listComplaint: action.payload, loading: false };
         case 'REPORT_FETCH_LOG':
             return { ...state, listLog: action.payload, loading: false };
+        case 'REPORT_FETCH_PENDING_REPORT':
+            return { ...state, listPendingReport: action.payload, loading: false };
         case 'REPORT_FETCH_CATEGORY':
             return { ...state, listCategory: action.payload, loading: false };
 
@@ -68,12 +70,14 @@ const localToState = dispatch => async() => {
     const serverLog = JSON.parse(await AsyncStorage.getItem('serverLog')) || [];
     const serverComplaint = JSON.parse(await AsyncStorage.getItem('serverComplaint')) || [];
     const serverCategory = JSON.parse(await AsyncStorage.getItem('serverCategory')) || [];
+    const serverPendingReport = JSON.parse(await AsyncStorage.getItem('serverPendingReport')) || [];
 
     dispatch({ type: 'REPORT_SET_LOCAL_LIST_ITEM', payload: localReportItem });
     dispatch({ type: 'REPORT_SET_LOCAL_LIST_RESOLVED', payload: localResolvedReport });
     dispatch({ type: 'REPORT_FETCH_LOG', payload: serverLog });
     dispatch({ type: 'REPORT_FETCH_COMPLAINT', payload: serverComplaint });
     dispatch({ type: 'REPORT_FETCH_CATEGORY', payload: serverCategory });
+    dispatch({ type: 'REPORT_FETCH_PENDING_REPORT', payload: serverPendingReport });
 }
 const getReportState = dispatch => async() => {
     dispatch({ type: 'DEFAULT' });
@@ -252,6 +256,26 @@ const fetchLog = dispatch => async () => {
     }
 };
 
+const fetchPendingReport = dispatch => async () => {
+    try {
+        dispatch({ type: 'REPORT_SET_LOADING', payload: true });
+        const token = await AsyncStorage.getItem('token');
+        const userDetail = jwtDecode(token);
+        const userID = userDetail.data.id_user;
+
+        const response = await easymoveinApi.get('/get_pending_report.php?block=' + userDetail.data.absensi_block);
+        const data = response.data || [];
+        const pendingReport = data.pending_report || [];
+
+        await AsyncStorage.setItem('serverPendingReport', JSON.stringify(pendingReport));
+        
+        dispatch({ type: 'REPORT_FETCH_PENDING_REPORT', payload: pendingReport });
+    } catch (error) {
+        console.log(error);
+        // processError(error);
+    }
+};
+
 const fetchCategory = dispatch => async () => {
     try {
         dispatch({ type: 'REPORT_SET_LOADING', payload: true });
@@ -322,38 +346,41 @@ const doPostReport = dispatch => async (val) => {
             let tempItem = headerLocal;
             await easymoveinApi.post('/post_baf_log.php', JSON.stringify(bafLogData))
                 .then( async (res) => {
-                    const listReportUpload = headerLocal.listReportUpload || [];
-                    await listReportUpload.map(async itemUpload => {
-                        const photo = itemUpload.photo_before || '';
-                        // console.log('>>>>', itemUpload)
-                        const base64 = await FileSystem.readAsStringAsync(photo, { encoding: 'base64' });
-                        
-                        const uploadData = {
-                            data: { ...headerLocal, ...itemUpload, listReportUpload: [] },
-                            photo: base64
-                        }
-                        // formData.append('photo', image);
-
-                        const response = await easymoveinApi.post('/post_report.php', JSON.stringify(uploadData));
-                        
-                        if(response.data.status == true){
-                            // DO DELETE LOCAL DATA
-                            console.log('>>>>>>>>>>>>>>>');
-                            console.log(tempItem)
-                            // console.log(tempItem.find(v => v == headerLocal));
-                            const newListReportUpload = (tempItem.listReportUpload || []).filter(v => v != itemUpload);
-                            const newListReportItem = tempReportItem.filter(v => v != headerLocal);
-                            tempItem = [ ...newListReportItem, {...headerLocal, listReportUpload: newListReportUpload} ];
+                    console.log(res);
+                    if(res.status){
+                        const listReportUpload = headerLocal.listReportUpload || [];
+                        await listReportUpload.map(async itemUpload => {
+                            const photo = itemUpload.photo_before || '';
+                            // console.log('>>>>', itemUpload)
+                            const base64 = await FileSystem.readAsStringAsync(photo, { encoding: 'base64' });
                             
+                            const uploadData = {
+                                data: { ...headerLocal, ...itemUpload, listReportUpload: [] },
+                                photo: base64
+                            }
+                            // formData.append('photo', image);
 
-                            await AsyncStorage.setItem('localReportItem', JSON.stringify(tempItem));
-                        }else{
-                            const errMsg = response.data.message;
-                            Alert.alert('Error', errMsg)
-                        }
-                        console.log('================');
-                        console.log(response.data);
-                    });
+                            const response = await easymoveinApi.post('/post_report.php', JSON.stringify(uploadData));
+                            
+                            if(response.data.status == true){
+                                // DO DELETE LOCAL DATA
+                                console.log('>>>>>>>>>>>>>>>');
+                                console.log(tempItem)
+                                // console.log(tempItem.find(v => v == headerLocal));
+                                const newListReportUpload = (tempItem.listReportUpload || []).filter(v => v != itemUpload);
+                                const newListReportItem = tempReportItem.filter(v => v != headerLocal);
+                                tempItem = [ ...newListReportItem, {...headerLocal, listReportUpload: newListReportUpload} ];
+                                
+
+                                await AsyncStorage.setItem('localReportItem', JSON.stringify(tempItem));
+                            }else{
+                                const errMsg = response.data.message;
+                                Alert.alert('Error', errMsg)
+                            }
+                            console.log('================');
+                            console.log(response.data);
+                        });
+                    }
                 })
                 .catch((res) => {
                     console.log(res);
@@ -435,8 +462,8 @@ const defaultList = {
 
 export const { Provider, Context} = createDataContext(
     reportReducer,
-    { doPostReport, doPostResolve, fetchAsset, fetchComplaint, fetchLog, fetchCategory, getReportState, addReportItem, addReportResolve, addScanItem, addUploadItem, setCurrentZone, setCurrentScan, resetReportScan, resetReportTemp, deleteScanItem, localToState },
+    { doPostReport, doPostResolve, fetchAsset, fetchComplaint, fetchLog, fetchPendingReport, fetchCategory, getReportState, addReportItem, addReportResolve, addScanItem, addUploadItem, setCurrentZone, setCurrentScan, resetReportScan, resetReportTemp, deleteScanItem, localToState },
 
     // default state reduce
-    { loading: false, listAsset: [], listComplaint: [], listLog: [], listReportItem: [], listCategory: [], listReportResolve: [], listReportUpload: [], listReportScan: [], currentReportAsset:[], currentReportZone: {}, currentReportScan: {} }
+    { loading: false, listAsset: [], listComplaint: [], listLog: [], listPendingReport: [], listReportItem: [], listCategory: [], listReportResolve: [], listReportUpload: [], listReportScan: [], currentReportAsset:[], currentReportZone: {}, currentReportScan: {} }
 )

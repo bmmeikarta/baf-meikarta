@@ -20,6 +20,7 @@ const HomeScreen = ({ navigation }) => {
         fetchAsset, 
         fetchComplaint, 
         fetchLog,
+        fetchPendingReport,
         fetchCategory,
         doPostReport, 
         doPostResolve 
@@ -79,17 +80,20 @@ const HomeScreen = ({ navigation }) => {
         const localResolvedReport = await AsyncStorage.getItem('localResolvedReport');
         const serverLog = await AsyncStorage.getItem('serverLog');
         const serverComplaint = await AsyncStorage.getItem('serverComplaint');
+        const serverPendingReport = await AsyncStorage.getItem('serverPendingReport');
         // navigation.setParams({ localReport: state.listReportItem, doPostReport: doPostReport });
         // console.log('HOME ', state.listReportItem);
         // console.log('LOCAL ', JSON.parse(local));
         // console.log('RESOLVED ', JSON.parse(localResolvedReport));
         // console.log('LOG ', JSON.parse(serverLog));
         // console.log('COMPLAINT ', JSON.parse(serverComplaint));
+        // console.log('PENDING_REPORT ', JSON.parse(serverPendingReport));
     }
 
     const onSyncData = async () => {
         await NetInfo.fetch().then(async isConnected => {
             if (isConnected) {
+                await fetchPendingReport();
                 await fetchLog();
                 await fetchComplaint();
                 await fetchCategory();
@@ -102,7 +106,7 @@ const HomeScreen = ({ navigation }) => {
 
                 await localToState();
                 await doPostReport();
-                // await doPostResolve();
+                await doPostResolve();
             } else {
                 Alert.alert("Oopss..", "Sorry you're offline now, please sync your data later");
             }
