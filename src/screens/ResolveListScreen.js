@@ -1,11 +1,12 @@
-import React, { useContext } from "react";
-import { StyleSheet, Text, View, ScrollView } from "react-native";
+import React, { useContext, useState } from "react";
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
 import { Button } from "react-native-elements";
 import { Timer, getStatusFloor } from "./ScheduleListScreen";
 import { NavigationEvents } from "react-navigation";
 import { Context as ScheduleContext } from '../context/ScheduleContext';
 import { Context as AuthContext } from '../context/AuthContext';
 import { Context as ReportContext } from '../context/ReportContext';
+import _ from "lodash";
 
 const ResolveListScreen = ({ navigation }) => {
   const { state: authState } = useContext(AuthContext);
@@ -14,7 +15,10 @@ const ResolveListScreen = ({ navigation }) => {
   const { master_unit, activeFloor, currentShift, schedulePattern } = state;
   const { userDetail } = authState;
   const { listComplaint } = reportState;
-  const dataUnit = (master_unit || []);
+  const uniqTower = _.uniq(_.map(master_unit, 'tower')) || [];
+  const defaultTower = uniqTower[0] || '';
+  const [activeTower, setActiveTower] = useState(defaultTower);
+  const dataUnit = (master_unit || []).filter(v => v.tower == activeTower);
 
   // console.log('REPORT LIST ', reportState);
   return (
@@ -36,6 +40,15 @@ const ResolveListScreen = ({ navigation }) => {
         { dataUnit.length > 0 &&
             <Text style={styles.textBlockName}>{dataUnit[0].blocks} - {dataUnit[0].tower}</Text>
         }
+        <View style={{ marginBottom: 20, flexDirection: 'row', justifyContent: "center", }}>
+            {
+                uniqTower.map(tower => {
+                    let bgFilter = 'white';
+                    if(tower == activeTower) bgFilter = 'orange'; 
+                    if(tower) return <TouchableOpacity key={tower} onPress={() => setActiveTower(tower)} style={[styles.filterTower, { backgroundColor: `${bgFilter}`}]}><Text style={styles.textTimer}>{tower}</Text></TouchableOpacity >
+                })
+            }
+        </View>
         <View style={styles.row}>
 
           {dataUnit.map((v, key) => {
@@ -96,6 +109,24 @@ const styles = StyleSheet.create({
     fontSize: 22,
     marginBottom: 10
   },
+  
+  textTimer: { 
+    textAlign: 'center', 
+    fontWeight: 'bold', 
+    fontSize: 16 
+  },
+  timer: { alignSelf: 'center', backgroundColor: '#2fc2b8', paddingVertical: 5, paddingHorizontal: 10, borderRadius: 5 },
+  filterTower: {
+      backgroundColor: 'white',
+      borderColor: 'orange',
+      borderWidth: 1,
+      alignSelf: 'center', 
+      paddingVertical: 5, 
+      paddingHorizontal: 10, 
+      borderRadius: 5,
+      width: 70,
+      marginHorizontal: 5
+  }
 })
 
 export default ResolveListScreen;

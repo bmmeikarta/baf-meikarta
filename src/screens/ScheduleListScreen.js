@@ -114,7 +114,7 @@ export const getStatusFloor = (blocks, floor, tower) => {
     const floorSkippedIDX = inactiveFloor.split(',');
     const canAccess = floorSkippedIDX.includes(floorTower) || activeIDX.includes(floorTower);
     
-    const checkZoneReport = listLog.filter(v => v.blocks == blocks && v.floor == floor);
+    const checkZoneReport = listLog.filter(v => v.blocks == blocks && v.floor == floor && v.tower == tower);
     
     if(checkZoneReport.length > 0 && checkZoneReport.length < 4 && canAccess) return 'on progress';
     if(checkZoneReport.length == 4) return 'done';
