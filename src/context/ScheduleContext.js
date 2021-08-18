@@ -159,7 +159,7 @@ const getCurrentShift = dispatch => async (x) => {
 
                                 return v.shift == shift && (hourNow >= v.start && hourNow < v.end)
                             }) || {};
-    console.log(currentShift, job, shift);
+    // console.log(currentShift, job, shift);
     dispatch({ type: 'SCHEDULE_CURRENT_SHIFT', payload: currentShift });
 }
 
