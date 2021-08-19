@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useLayoutEffect } from "react";
+import React, { useContext, useEffect, useLayoutEffect, useState } from "react";
 import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
 import {Text, Button, Badge} from "react-native-elements";
 import { NavigationEvents, SafeAreaView } from "react-navigation";
@@ -8,8 +8,9 @@ import { Context as AuthContext } from "../context/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import moment from "moment";
 import { Ionicons } from "@expo/vector-icons";
-import NetInfo from "@react-native-community/netinfo";
+import NetInfo, { addEventListener, configure, useNetInfo } from "@react-native-community/netinfo";
 import _ from "lodash";
+import easymoveinApi from "../api/easymovein";
 
 const HomeScreen = ({ navigation }) => {
     const { state: authState } = useContext(AuthContext);
@@ -89,10 +90,14 @@ const HomeScreen = ({ navigation }) => {
         // console.log('COMPLAINT ', JSON.parse(serverComplaint));
         // console.log('PENDING_REPORT ', JSON.parse(serverPendingReport));
     }
-
+    
     const onSyncData = async () => {
-        await NetInfo.fetch().then(async isConnected => {
-            if (isConnected) {
+        // await easymoveinApi.get('/get_pending_report.php?block=' + userDetail.data.absensi_block, { timeout: 10 })
+        //     .then(res => console.log(res.status))
+        //     .catch(err => console.log(err.message));
+
+        await NetInfo.fetch().then(async state => {
+            if (state.isConnected) {
                 await fetchPendingReport();
                 await fetchLog();
                 await fetchComplaint();
@@ -108,7 +113,7 @@ const HomeScreen = ({ navigation }) => {
                 await doPostReport();
                 await doPostResolve();
             } else {
-                Alert.alert("Oopss..", "Sorry you're offline now, please sync your data later");
+                Alert.alert("Oopss..", "Sorry you're offline now, please sync your data every 1 hour");
             }
         });
         

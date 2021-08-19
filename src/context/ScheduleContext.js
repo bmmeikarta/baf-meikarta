@@ -7,6 +7,7 @@ import { navigate } from "../navigationRef";
 import moment from "moment";
 import jwtDecode from "jwt-decode";
 import _, { concat } from "lodash";
+import axios from "axios";
 
 const scheduleReducer = (state, action) => {
     switch (action.type) {
@@ -99,10 +100,14 @@ const processError = (error) => {
 
 const fetchSchedulePattern = dispatch => async () => {
     try {
-        const response = await easymoveinApi.get('/get_schedule_pattern.php');
+        let abort = axios.CancelToken.source();
+        setTimeout(() => { abort.cancel(`Timeout`) }, 10000);
+
+        const response = await easymoveinApi.get('/get_schedule_pattern.php', { cancelToken: abort.token });
         dispatch({ type: 'SCHEDULE_PATTERN_FETCH', payload: response.data });
     } catch (error) {
         processError(error);
+        Alert.alert('Error', `Failed to fetch Schedule Pattern, you're offline now, please sync your data every 1 hour`);
     }
 };
 
@@ -113,7 +118,10 @@ const fetchSchedule = dispatch => async () => {
         
         const block = userDetail.data.absensi_block || '51022';
         
-        const response = await easymoveinApi.get('/get_schedule.php?block='+ block);
+        let abort = axios.CancelToken.source();
+        setTimeout(() => { abort.cancel(`Timeout`) }, 10000);
+
+        const response = await easymoveinApi.get('/get_schedule.php?block='+ block, { cancelToken: abort.token });
         const data = response.data || [];
         const masterUnit = data.master_unit || [];
         const uniqTower = _.uniq(_.map(masterUnit, 'tower'));
@@ -129,6 +137,7 @@ const fetchSchedule = dispatch => async () => {
         dispatch({ type: 'SCHEDULE_FETCH', payload: data });
     } catch (error) {
         processError(error);
+        Alert.alert('Error', `Failed to fetch Schedule, you're offline now, please sync your data every 1 hour`);
     }
 };
 

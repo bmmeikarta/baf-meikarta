@@ -43,7 +43,7 @@ const signin = (dispatch) => async ({ email, password }, callback) => {
     try {
         clearError();
         email = email.toLowerCase();
-        const response = await easymoveinApi.post('/login.php', { email, password });
+        const response = await easymoveinApi.post('/login.php', { email, password }, { timeout: 30 });
         if(!response.data.status) throw new Error(response.data.message);
 
         await AsyncStorage.setItem('token', response.data.token);

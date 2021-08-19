@@ -5,6 +5,7 @@ import * as FileSystem from 'expo-file-system';
 import easymoveinApi from "../api/easymovein";
 import moment from "moment";
 import jwtDecode from "jwt-decode";
+import axios from "axios";
 
 const reportReducer = (state, action) => {
     switch (action.type) {
@@ -201,7 +202,10 @@ const resetReportTemp = dispatch => async(data) => {
 const fetchAsset = dispatch => async () => {
     try {
         dispatch({ type: 'REPORT_SET_LOADING', payload: true });
-        const response = await easymoveinApi.get('/get_asset.php');
+        let source = axios.CancelToken.source();
+        setTimeout(() => { source.cancel(`Timeout`) }, 30000);
+
+        const response = await easymoveinApi.get('/get_asset.php', { cancelToken: source.token });
         const data = response.data || [];
         const bafAsset = data.baf_asset || [];
 
@@ -210,6 +214,8 @@ const fetchAsset = dispatch => async () => {
         dispatch({ type: 'REPORT_FETCH_ASSET', payload: bafAsset });
     } catch (error) {
         console.log(error);
+        Alert.alert('Error', `Failed to fetch Asset, you're offline now, please sync your data every 1 hour`);
+        dispatch({ type: 'REPORT_SET_LOADING', payload: false });
         // processError(error);
     }
 };
@@ -222,8 +228,11 @@ const fetchComplaint = dispatch => async () => {
         const block = userDetail.data.absensi_block;
         const userID = userDetail.data.id_user;
         const profileID = userDetail.data.profile_id;
-        console.log('/get_list_report.php?block=' + block + '&profile_id=' + profileID + '&id_user=' + userID)
-        const response = await easymoveinApi.get('/get_list_report.php?block=' + block + '&profile_id=' + profileID + '&id_user=' + userID);
+        // console.log('/get_list_report.php?block=' + block + '&profile_id=' + profileID + '&id_user=' + userID)
+        let source = axios.CancelToken.source();
+        setTimeout(() => { source.cancel(`Timeout`) }, 10000);
+        
+        const response = await easymoveinApi.get('/get_list_report.php?block=' + block + '&profile_id=' + profileID + '&id_user=' + userID, { cancelToken: source.token });
         const data = response.data || [];
         const bafReport = data.baf_report || [];
 
@@ -233,6 +242,8 @@ const fetchComplaint = dispatch => async () => {
     } catch (error) {
         console.log(error);
         // processError(error);
+        Alert.alert('Error', `Failed to fetch Complaint, you're offline now, please sync your data every 1 hour`);
+        dispatch({ type: 'REPORT_SET_LOADING', payload: false });
     }
 };
 
@@ -243,7 +254,10 @@ const fetchLog = dispatch => async () => {
         const userDetail = jwtDecode(token);
         const userID = userDetail.data.id_user;
 
-        const response = await easymoveinApi.get('/get_baf_log.php?id_user=' + userID);
+        let source = axios.CancelToken.source();
+        setTimeout(() => { source.cancel(`Timeout`) }, 10000);
+        
+        const response = await easymoveinApi.get('/get_baf_log.php?id_user=' + userID, { cancelToken: source.token });
         const data = response.data || [];
         const bafLog = data.baf_log || [];
 
@@ -253,6 +267,8 @@ const fetchLog = dispatch => async () => {
     } catch (error) {
         console.log(error);
         // processError(error);
+        Alert.alert('Error', `Failed to fetch Log, you're offline now, please sync your data every 1 hour`);
+        dispatch({ type: 'REPORT_SET_LOADING', payload: false });
     }
 };
 
@@ -263,7 +279,10 @@ const fetchPendingReport = dispatch => async () => {
         const userDetail = jwtDecode(token);
         const userID = userDetail.data.id_user;
 
-        const response = await easymoveinApi.get('/get_pending_report.php?block=' + userDetail.data.absensi_block);
+        let source = axios.CancelToken.source();
+        setTimeout(() => { source.cancel(`Timeout`) }, 30000);
+
+        const response = await easymoveinApi.get('/get_pending_report.php?block=' + userDetail.data.absensi_block, { cancelToken: source.token });
         const data = response.data || [];
         const pendingReport = data.pending_report || [];
 
@@ -273,6 +292,8 @@ const fetchPendingReport = dispatch => async () => {
     } catch (error) {
         console.log(error);
         // processError(error);
+        Alert.alert('Error', `Failed to fetch Pending Report, you're offline now, please sync your data every 1 hour`);
+        dispatch({ type: 'REPORT_SET_LOADING', payload: false });
     }
 };
 
@@ -280,7 +301,10 @@ const fetchCategory = dispatch => async () => {
     try {
         dispatch({ type: 'REPORT_SET_LOADING', payload: true });
 
-        const response = await easymoveinApi.get('/get_category.php');
+        let source = axios.CancelToken.source();
+        setTimeout(() => { source.cancel(`Timeout`) }, 30000);
+
+        const response = await easymoveinApi.get('/get_category.php', { cancelToken: source.token });
         const data = response.data || [];
         const category = data.category || [];
         // title: "Keamanan",
@@ -331,6 +355,8 @@ const fetchCategory = dispatch => async () => {
     } catch (error) {
         console.log(error);
         // processError(error);
+        Alert.alert('Error', `Failed to fetch Category, you're offline now, please sync your data every 1 hour`);
+        dispatch({ type: 'REPORT_SET_LOADING', payload: false });
     }
 };
 
@@ -344,7 +370,11 @@ const doPostReport = dispatch => async (val) => {
                 data: { ...headerLocal, listReportUpload: [] },
             }
             let tempItem = headerLocal;
-            await easymoveinApi.post('/post_baf_log.php', JSON.stringify(bafLogData))
+
+            let source = axios.CancelToken.source();
+            setTimeout(() => { source.cancel(`Timeout`) }, 30000);
+
+            await easymoveinApi.post('/post_baf_log.php', JSON.stringify(bafLogData), { cancelToken: source.token })
                 .then( async (res) => {
                     console.log(res);
                     if(res.status){
@@ -360,7 +390,10 @@ const doPostReport = dispatch => async (val) => {
                             }
                             // formData.append('photo', image);
 
-                            const response = await easymoveinApi.post('/post_report.php', JSON.stringify(uploadData));
+                            let abort = axios.CancelToken.source();
+                            setTimeout(() => { abort.cancel(`Timeout`) }, 30000);
+
+                            const response = await easymoveinApi.post('/post_report.php', JSON.stringify(uploadData), { cancelToken: abort.token });
                             
                             if(response.data.status == true){
                                 // DO DELETE LOCAL DATA
@@ -375,7 +408,7 @@ const doPostReport = dispatch => async (val) => {
                                 await AsyncStorage.setItem('localReportItem', JSON.stringify(tempItem));
                             }else{
                                 const errMsg = response.data.message;
-                                Alert.alert('Error', errMsg)
+                                Alert.alert('Error', `Failed to upload report, you're offline now, please sync your data every 1 hour`)
                             }
                             console.log('================');
                             console.log(response.data);
@@ -384,7 +417,8 @@ const doPostReport = dispatch => async (val) => {
                 })
                 .catch((res) => {
                     console.log(res);
-                    Alert.alert('Info', 'Failed sync to baf_log, please try again later');
+                    Alert.alert('Info', `Failed sync to baf_log, you're offline now, please sync your data every 1 hour`);
+                    dispatch({ type: 'REPORT_SET_LOADING', payload: false });
                 });
 
                 if(tempItem.listReportUpload.length == 0){
@@ -400,6 +434,7 @@ const doPostReport = dispatch => async (val) => {
     } catch (error) {
         console.log(error);
         // processError(error);
+        dispatch({ type: 'REPORT_SET_LOADING', payload: false });
     }
 };
 
@@ -419,7 +454,10 @@ const doPostResolve = dispatch => async (val) => {
             }
             // formData.append('photo', image);
 
-            const response = await easymoveinApi.post('/post_resolve.php', JSON.stringify(uploadData));
+            let abort = axios.CancelToken.source();
+            setTimeout(() => { abort.cancel(`Timeout`) }, 30000);
+
+            const response = await easymoveinApi.post('/post_resolve.php', JSON.stringify(uploadData), { cancelToken: abort.token });
             if(response.data.status == true){
                 // DO DELETE LOCAL DATA
                 const newListReportItem = tempItem.filter(v => v != headerLocal);
@@ -435,6 +473,8 @@ const doPostResolve = dispatch => async (val) => {
     } catch (error) {
         console.log(error);
         // processError(error);
+        Alert.alert('Error', `Failed to upload Resolve, you're offline now, please sync your data every 1 hour`);
+        dispatch({ type: 'REPORT_SET_LOADING', payload: false });
     }
 };
 
