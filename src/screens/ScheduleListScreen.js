@@ -99,7 +99,7 @@ export const getStatusFloor = (blocks, floor, tower) => {
     // e.g. jam ke 1 dari shift
     const hourNow = moment().format('H');
     
-    const activeBlock = (schedulePattern || []).find(v => v.block == blocks && v.job == 12) || {};
+    const activeBlock = (schedulePattern || []).find(v => v.block == blocks && v.job == job) || {};
     const blockPattern = activeBlock.patterns || [];
     const activeFloor = blockPattern[hourNow] || '';
     const activeIDX = activeFloor.split(',');
@@ -112,6 +112,7 @@ export const getStatusFloor = (blocks, floor, tower) => {
     }
 
     const floorSkippedIDX = inactiveFloor.split(',');
+    console.log(activeIDX);
     const canAccess = floorSkippedIDX.includes(floorTower) || activeIDX.includes(floorTower);
     
     const checkZoneReport = listLog.filter(v => v.blocks == blocks && v.floor == floor && v.tower == tower);
