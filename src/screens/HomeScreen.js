@@ -11,10 +11,12 @@ import { Ionicons } from "@expo/vector-icons";
 import NetInfo, { addEventListener, configure, useNetInfo } from "@react-native-community/netinfo";
 import _ from "lodash";
 import easymoveinApi from "../api/easymovein";
+import Constants from "expo-constants"
+
 
 const HomeScreen = ({ navigation }) => {
     const { state: authState } = useContext(AuthContext);
-    const { fetchSchedule, fetchSchedulePattern, getCurrentShift } = useContext(ScheduleContext);
+    const { fetchSchedule, fetchSchedulePattern, getCurrentShift, localToState: sheduleLocalToState } = useContext(ScheduleContext);
     const { 
         state, 
         localToState, 
@@ -33,7 +35,13 @@ const HomeScreen = ({ navigation }) => {
     const countReportUpload = _.sum(listReportItem.map(v => v.listReportUpload.length));
 
     const countNotSync = listReportResolve.length + listReportItem.length;
-    const countNotResolve = listComplaint.filter(v => v.status == 'REPORTED').length;
+    // const countNotResolve = listComplaint.filter(v => v.status == 'REPORTED').length;
+    const countNotResolve = listComplaint.map(c => {
+        const isResolved = listReportResolve.find(z => z.idReport == c.idx);
+        c.status = isResolved ? 'RESOLVED' : c.status;
+
+        return c;
+    }).filter(v => v.status == 'REPORTED').length;
 
     const exampleData = [
         {
@@ -95,23 +103,23 @@ const HomeScreen = ({ navigation }) => {
         // await easymoveinApi.get('/get_pending_report.php?block=' + userDetail.data.absensi_block, { timeout: 10 })
         //     .then(res => console.log(res.status))
         //     .catch(err => console.log(err.message));
-
         await NetInfo.fetch().then(async state => {
             if (state.isConnected) {
-                await fetchPendingReport();
+                await doPostReport();
+                await doPostResolve();
+
+                await fetchAsset();
                 await fetchLog();
+                await fetchPendingReport();
                 await fetchComplaint();
                 await fetchCategory();
                 await fetchLocalReportItem();
                 // await addReportItem(exampleData[0]);
-                await fetchAsset();
                 await fetchSchedule();
                 await fetchSchedulePattern();
                 await getCurrentShift();
 
                 await localToState();
-                await doPostReport();
-                await doPostResolve();
             } else {
                 Alert.alert("Oopss..", "Sorry you're offline now, please sync your data every 1 hour");
             }
@@ -123,16 +131,26 @@ const HomeScreen = ({ navigation }) => {
     <>
         <NavigationEvents 
             onWillFocus={async() => {
-                await onSyncData();
+                // await AsyncStorage.removeItem('serverSchedule');
+                await sheduleLocalToState();
+                await localToState();
+                // await onSyncData();
             }}
         />
         {/* <SafeAreaView> */}
-            <View>
+            <View style={styles.box}>
                 {loading && 
-                    <Text style={styles.status}>updating db...</Text>
+                    <View style={[styles.version, {flexDirection: 'row'}]}>
+                        <View style={{alignSelf: 'flex-start', width: '40%'}}><Text style={{textAlign: 'left', color: '#b3b3b3'}}>baf.v.{Constants.manifest.version}</Text></View>
+                        <View style={{alignSelf: 'flex-end', width: '60%'}}><Text style={{textAlign: 'right', color: '#b3b3b3'}}>updating db...</Text></View>
+                    </View>
+                    
                 }
                 {!loading && 
-                    <Text style={styles.status}>db last update: {lastUpdateDB}</Text>
+                    <View style={[styles.version, {flexDirection: 'row'}]}>
+                        <View style={{alignSelf: 'flex-start', width: '40%'}}><Text style={{textAlign: 'left', color: '#b3b3b3'}}>baf.v.{Constants.manifest.version}</Text></View>
+                        <View style={{alignSelf: 'flex-end', width: '60%'}}><Text style={{textAlign: 'right', color: '#b3b3b3'}}>db last update: {lastUpdateDB}</Text></View>
+                    </View>
                 }
                 <View style={styles.headerButton}>
                     
@@ -161,6 +179,7 @@ const HomeScreen = ({ navigation }) => {
                     }
                 </View>
             </View>
+            <View style={styles.box}><Text style={styles.username}>Hi, {((userDetail || {}).data || {}).full_name}</Text></View>
             <SafeAreaView style={styles.screen}>
                 <Button 
                     buttonStyle={styles.button}
@@ -209,6 +228,7 @@ const HomeScreen = ({ navigation }) => {
                     </View>
                 </View>
             </SafeAreaView>
+            
         {/* </SafeAreaView> */}
         
     </>
@@ -243,9 +263,17 @@ const styles = StyleSheet.create({
         borderRadius: 4,
         height: 80,
     },
-    status:{
-        textAlign: "right",
+    version:{
         fontSize: 11,
+        padding: 6,
+    },
+    status:{
+        fontSize: 11,
+        padding: 6,
+    },
+    username: {
+        fontSize: 20,
+        fontWeight: 'bold',
         padding: 6
     },
     headerButton: {
@@ -257,6 +285,18 @@ const styles = StyleSheet.create({
         top: -4,
         right: -4,
     },
+    box: {
+        backgroundColor: 'white', padding: 10, margin: 10, marginBottom: 0, borderRadius: 10,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.23,
+        shadowRadius: 2.62,
+
+        elevation: 4,
+    }
 });
 
 HomeScreen.navigationOptions = ({ navigation }) => {

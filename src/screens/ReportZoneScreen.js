@@ -16,7 +16,8 @@ const ReportZoneScreen = ({ navigation }) => {
         await setCurrentZone({blocks, tower, floor, zone});
         // navigation.navigate('ReportDetail', { headerTitle: `${floorName}` });
 
-        navigation.navigate('ReportScannerZone', { headerTitle: `${floorName}`, zone, parentScreen });
+        if(parentScreen == 'Report') navigation.navigate('ReportScannerZone', { headerTitle: `${floorName}`, zone, parentScreen });
+        if(parentScreen == 'Resolve') navigation.navigate('ResolveScannerZone', { headerTitle: `${floorName}`, zone, parentScreen });
 
     };
     const checkZoneStored = (zone) => {

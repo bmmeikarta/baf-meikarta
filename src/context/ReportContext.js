@@ -203,7 +203,7 @@ const fetchAsset = dispatch => async () => {
     try {
         dispatch({ type: 'REPORT_SET_LOADING', payload: true });
         let source = axios.CancelToken.source();
-        setTimeout(() => { source.cancel(`Timeout`) }, 30000);
+        setTimeout(() => { source.cancel(`Timeout`) }, 5000);
 
         const response = await easymoveinApi.get('/get_asset.php', { cancelToken: source.token });
         const data = response.data || [];
@@ -230,7 +230,7 @@ const fetchComplaint = dispatch => async () => {
         const profileID = userDetail.data.profile_id;
         // console.log('/get_list_report.php?block=' + block + '&profile_id=' + profileID + '&id_user=' + userID)
         let source = axios.CancelToken.source();
-        setTimeout(() => { source.cancel(`Timeout`) }, 10000);
+        setTimeout(() => { source.cancel(`Timeout`) }, 5000);
         
         const response = await easymoveinApi.get('/get_list_report.php?block=' + block + '&profile_id=' + profileID + '&id_user=' + userID, { cancelToken: source.token });
         const data = response.data || [];
@@ -255,7 +255,7 @@ const fetchLog = dispatch => async () => {
         const userID = userDetail.data.id_user;
 
         let source = axios.CancelToken.source();
-        setTimeout(() => { source.cancel(`Timeout`) }, 10000);
+        setTimeout(() => { source.cancel(`Timeout`) }, 5000);
         
         const response = await easymoveinApi.get('/get_baf_log.php?id_user=' + userID, { cancelToken: source.token });
         const data = response.data || [];
@@ -280,7 +280,7 @@ const fetchPendingReport = dispatch => async () => {
         const userID = userDetail.data.id_user;
 
         let source = axios.CancelToken.source();
-        setTimeout(() => { source.cancel(`Timeout`) }, 30000);
+        setTimeout(() => { source.cancel(`Timeout`) }, 10000);
 
         const response = await easymoveinApi.get('/get_pending_report.php?block=' + userDetail.data.absensi_block, { cancelToken: source.token });
         const data = response.data || [];
@@ -302,7 +302,7 @@ const fetchCategory = dispatch => async () => {
         dispatch({ type: 'REPORT_SET_LOADING', payload: true });
 
         let source = axios.CancelToken.source();
-        setTimeout(() => { source.cancel(`Timeout`) }, 30000);
+        setTimeout(() => { source.cancel(`Timeout`) }, 5000);
 
         const response = await easymoveinApi.get('/get_category.php', { cancelToken: source.token });
         const data = response.data || [];
@@ -372,7 +372,7 @@ const doPostReport = dispatch => async (val) => {
             let tempItem = headerLocal;
 
             let source = axios.CancelToken.source();
-            setTimeout(() => { source.cancel(`Timeout`) }, 30000);
+            setTimeout(() => { source.cancel(`Timeout`) }, 5000);
 
             await easymoveinApi.post('/post_baf_log.php', JSON.stringify(bafLogData), { cancelToken: source.token })
                 .then( async (res) => {
@@ -391,7 +391,7 @@ const doPostReport = dispatch => async (val) => {
                             // formData.append('photo', image);
 
                             let abort = axios.CancelToken.source();
-                            setTimeout(() => { abort.cancel(`Timeout`) }, 30000);
+                            setTimeout(() => { abort.cancel(`Timeout`) }, 5000);
 
                             const response = await easymoveinApi.post('/post_report.php', JSON.stringify(uploadData), { cancelToken: abort.token });
                             
@@ -455,7 +455,7 @@ const doPostResolve = dispatch => async (val) => {
             // formData.append('photo', image);
 
             let abort = axios.CancelToken.source();
-            setTimeout(() => { abort.cancel(`Timeout`) }, 30000);
+            setTimeout(() => { abort.cancel(`Timeout`) }, 5000);
 
             const response = await easymoveinApi.post('/post_resolve.php', JSON.stringify(uploadData), { cancelToken: abort.token });
             if(response.data.status == true){

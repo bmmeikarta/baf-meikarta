@@ -14,7 +14,7 @@ const ResolveListScreen = ({ navigation }) => {
   const { state, fetchSchedule, fetchSchedulePattern, getCurrentShift, getActiveFloor } = useContext(ScheduleContext);
   const { master_unit, activeFloor, currentShift, schedulePattern } = state;
   const { userDetail } = authState;
-  const { listComplaint } = reportState;
+  const { listComplaint, listReportResolve } = reportState;
   const uniqTower = _.uniq(_.map(master_unit, 'tower')) || [];
   const defaultTower = uniqTower[0] || '';
   const [activeTower, setActiveTower] = useState(defaultTower);
@@ -57,10 +57,15 @@ const ResolveListScreen = ({ navigation }) => {
             const floorComplaint = listComplaint.filter(c => c.blocks == v.blocks && c.tower == v.tower && c.floor == v.floor);
             const isAnyComplaint = floorComplaint.filter(c => c.status == 'REPORTED');
 
+            const isLocalResolved = isAnyComplaint.filter(c => {
+              const isResolved = listReportResolve.find(z => z.idReport == c.idx);
+              return isResolved ? true : false;
+            });
+
             let bgFloor = '#000';
             // if(statusFloor == 'active') bgFloor = '#6598eb';
             if(isAnyComplaint.length > 0) bgFloor = '#bd0f0f'; // MERAH
-            if(floorComplaint.length > 0 && isAnyComplaint.length == 0) bgFloor = '#41db30'; // HIJAU
+            if((floorComplaint.length > 0 && isAnyComplaint.length == 0) || (floorComplaint.length > 0 && isLocalResolved.length == isAnyComplaint.length)) bgFloor = '#41db30'; // HIJAU
 
             const canAccess = isAnyComplaint.length > 0 || floorComplaint.length > 0;
             

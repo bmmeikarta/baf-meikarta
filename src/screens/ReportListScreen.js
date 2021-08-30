@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { Button } from "react-native-elements";
 import { Timer, getStatusFloor } from "./ScheduleListScreen";
 import { NavigationEvents } from "react-navigation";
@@ -7,6 +7,7 @@ import { Context as ScheduleContext } from '../context/ScheduleContext';
 import { Context as AuthContext } from '../context/AuthContext';
 import { Context as ReportContext } from '../context/ReportContext';
 import _ from "lodash";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ReportListScreen = ({ navigation }) => {
   const { state: authState } = useContext(AuthContext);
@@ -20,21 +21,21 @@ const ReportListScreen = ({ navigation }) => {
   const [activeTower, setActiveTower] = useState(defaultTower);
   const dataUnit = (master_unit || []).filter(v => v.tower == activeTower);
 
-  // console.log('REPORT LIST ', reportState);
   return (
     <>
       <NavigationEvents 
         onWillFocus={async() => {
-          await fetchSchedule();
-          await fetchSchedulePattern();
+          const serverSchedule = JSON.parse(await AsyncStorage.getItem('serverSchedule')) || [];
+          const serverSchedulePattern = JSON.parse(await AsyncStorage.getItem('serverSchedulePattern')) || [];
+          if(serverSchedule.length == 0) Alert.alert('Info', 'No schedule, please try to sync');
           await getCurrentShift();
-          await getActiveFloor(currentShift, schedulePattern, '51022');
+          setActiveTower(defaultTower);
         }}
       />
       <ScrollView style={styles.screen}>
         <Timer getCurrentShift={getCurrentShift}></Timer>
         { dataUnit.length == 0 &&
-            <Text style={styles.textBlockName}>loading..</Text>
+            <Text style={styles.textBlockName}>No Schedule</Text>
         }
         { dataUnit.length > 0 &&
             <Text style={styles.textBlockName}>{dataUnit[0].blocks} - {dataUnit[0].tower}</Text>
@@ -53,7 +54,6 @@ const ReportListScreen = ({ navigation }) => {
           {dataUnit.map((v, key) => {
 
             const statusFloor = getStatusFloor(v.blocks, v.floor, v.tower);
-
             let bgFloor = '#000';
             if(statusFloor == 'active') bgFloor = '#6598eb';
             if(statusFloor == 'on progress') bgFloor = '#dfe305';

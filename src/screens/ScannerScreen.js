@@ -8,7 +8,7 @@ import { Context as ReportContext } from '../context/ReportContext';
 
 const ScannerScreen = ({ navigation }) => {
     const { state, addScanItem } = useContext(ReportContext);
-    const { currentReportScan, currentReportAsset, listReportScan } = state;
+    const { currentReportScan, currentReportAsset, listReportScan, listPendingReport } = state;
     const dataScan = (listReportScan || []).find(v => v.category == currentReportScan.category && v.problem == currentReportScan.problem && v.item_name == currentReportScan.item_name) || {};
 
     const [hasPermission, setHasPermission] = useState(null);
@@ -51,9 +51,12 @@ const ScannerScreen = ({ navigation }) => {
     const checkItemName = checkAsset.find(v => v.remark.toLowerCase() == currentReportScan.item_name.toLowerCase())
     if(!checkItemName) return alertError('Scanned item not match with category');
 
+    const isPending = listPendingReport.find(v => v.category == currentReportScan.category && v.problem == currentReportScan.problem && v.qrcode == data);
+    if(isPending) return alertError('Sorry, this item has been reported and not yet resolved');
+
     Alert.alert(
       'Scanned Item !',
-      checkItemName.qrcode + '\n\nAre you sure want to process this asset ?',
+      checkItemName.qrcode + ' - '+ checkItemName.remark +'\n\nAre you sure want to process this asset ?',
       [
         {
           text: 'No'

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { View, Text, StyleSheet, Button, ScrollView, SafeAreaView, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Button, ScrollView, SafeAreaView, TouchableOpacity, Alert } from "react-native";
 import moment from 'moment';
 import { NavigationEvents } from "react-navigation";
 import { Context as ScheduleContext } from '../context/ScheduleContext';
@@ -29,10 +29,12 @@ const ScheduleListScreen = ({ navigation, showActiveOnly, parentComponent }) => 
     // }
     return (
     <>
-        <NavigationEvents onWillFocus={() => {
-            fetchSchedulePattern();
-            fetchSchedule();
-            getCurrentShift();
+        <NavigationEvents onWillFocus={ async () => {
+            const serverSchedule = JSON.parse(await AsyncStorage.getItem('serverSchedule')) || [];
+            const serverSchedulePattern = JSON.parse(await AsyncStorage.getItem('serverSchedulePattern')) || [];
+            if(serverSchedule.length == 0) Alert.alert('Info', 'No schedule, please try to sync');
+            await getCurrentShift();
+            setActiveTower(defaultTower);
         }} />
         <ScrollView style={styles.screen}>
             <Timer getCurrentShift={getCurrentShift}/>
@@ -112,7 +114,7 @@ export const getStatusFloor = (blocks, floor, tower) => {
     }
 
     const floorSkippedIDX = inactiveFloor.split(',');
-    console.log(activeIDX);
+    // console.log(activeBlock);
     const canAccess = floorSkippedIDX.includes(floorTower) || activeIDX.includes(floorTower);
     
     const checkZoneReport = listLog.filter(v => v.blocks == blocks && v.floor == floor && v.tower == tower);

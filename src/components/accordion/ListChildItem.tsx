@@ -36,15 +36,15 @@ const ListChildItem = ({ navigation, category, problem, item, isLast }) => {
     const bottomRadius = isLast ? 8 : 0;
 
     const onClickScan = (itemName) => {
-      const isPending = listPendingReport.find(v => v.blocks == currentReportZone.blocks 
-        && v.tower == currentReportZone.tower && v.floor == currentReportZone.floor 
-        && v.zone == currentReportZone.zone && v.category == category && v.problem == problem && v.item_name.toLowerCase() == item.name.toLowerCase()
-      );
+      // const isPending = listPendingReport.find(v => v.blocks == currentReportZone.blocks 
+      //   && v.tower == currentReportZone.tower && v.floor == currentReportZone.floor 
+      //   && v.zone == currentReportZone.zone && v.category == category && v.problem == problem && v.item_name.toLowerCase() == item.name.toLowerCase()
+      // );
 
-      if(isPending){
-        Alert.alert('Info', 'Sorry, this item has been reported and not yet resolved');
-        return
-      }
+      // if(isPending){
+      //   Alert.alert('Info', 'Sorry, this item has been reported and not yet resolved');
+      //   return
+      // }
       setCurrentScan({ ...currentReportZone, category, problem, item_name: itemName })
       navigation.navigate('ReportScanner')
     }

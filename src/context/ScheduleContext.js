@@ -98,12 +98,21 @@ const processError = (error) => {
     }
 }
 
+const localToState = dispatch => async() => {
+    const serverSchedule = JSON.parse(await AsyncStorage.getItem('serverSchedule')) || [];
+    const serverSchedulePattern = JSON.parse(await AsyncStorage.getItem('serverSchedulePattern')) || [];
+
+    dispatch({ type: 'SCHEDULE_FETCH', payload: serverSchedule });
+    dispatch({ type: 'SCHEDULE_PATTERN_FETCH', payload: serverSchedulePattern });
+}
+
 const fetchSchedulePattern = dispatch => async () => {
     try {
         let abort = axios.CancelToken.source();
-        setTimeout(() => { abort.cancel(`Timeout`) }, 10000);
+        setTimeout(() => { abort.cancel(`Timeout`) }, 5000);
 
         const response = await easymoveinApi.get('/get_schedule_pattern.php', { cancelToken: abort.token });
+        await AsyncStorage.setItem('serverSchedulePattern', JSON.stringify(response.data));
         dispatch({ type: 'SCHEDULE_PATTERN_FETCH', payload: response.data });
     } catch (error) {
         processError(error);
@@ -119,7 +128,7 @@ const fetchSchedule = dispatch => async () => {
         const block = userDetail.data.absensi_block || '51022';
         
         let abort = axios.CancelToken.source();
-        setTimeout(() => { abort.cancel(`Timeout`) }, 10000);
+        setTimeout(() => { abort.cancel(`Timeout`) }, 5000);
 
         const response = await easymoveinApi.get('/get_schedule.php?block='+ block, { cancelToken: abort.token });
         const data = response.data || [];
@@ -133,7 +142,7 @@ const fetchSchedule = dispatch => async () => {
             ];
             data.master_unit = data.master_unit.concat(concatData);
         });
-        
+        await AsyncStorage.setItem('serverSchedule', JSON.stringify(data));
         dispatch({ type: 'SCHEDULE_FETCH', payload: data });
     } catch (error) {
         processError(error);
@@ -201,7 +210,7 @@ const getActiveFloor = dispatch => async(currentShift, schedulePattern, blocks) 
 
 export const { Provider, Context} = createDataContext(
     scheduleReducer,
-    { fetchSchedule, fetchSchedulePattern, getCurrentShift, getActiveFloor },
+    { fetchSchedule, fetchSchedulePattern, getCurrentShift, getActiveFloor, localToState },
 
     // default state reduce
     { currentShift: {}, schedulePattern: [], activeFloor: [] }
