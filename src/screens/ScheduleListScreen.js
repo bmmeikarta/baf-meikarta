@@ -92,7 +92,7 @@ export const getStatusFloor = (blocks, floor, tower) => {
     const { userDetail } = authState;
     const { listLog } = reportState;
 
-    if(!currentShift.start) return 'future';
+    if(!currentShift.start && currentShift.start != 0) return 'future';
     
     let job = ((userDetail || {}).data || {}).profile_id;
     // if(['21','14','12'].includes(job) === false) job = 12;

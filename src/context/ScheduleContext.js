@@ -43,6 +43,11 @@ const mapWorkHour = [
                 start: 22,
                 end: 5
             },
+            {
+                shift: 'Non Shift',
+                start: 0,
+                end: 23
+            },
         ]
     },
     // TODO: JANGAN LUPA GANTI 
@@ -58,6 +63,11 @@ const mapWorkHour = [
                 shift: 2,
                 start: 20,
                 end: 8
+            },
+            {
+                shift: 'Non Shift',
+                start: 0,
+                end: 23
             },
         ]
     },
@@ -78,6 +88,11 @@ const mapWorkHour = [
                 shift: 3,
                 start: 22,
                 end: 5
+            },
+            {
+                shift: 'Non Shift',
+                start: 0,
+                end: 23
             },
         ]
     }

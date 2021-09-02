@@ -62,6 +62,7 @@ const signin = (dispatch) => async ({ email, password }, callback) => {
 
 const signout = (dispatch) => async () => {
     await AsyncStorage.removeItem('token');
+    await AsyncStorage.removeItem('serverSchedule');
     dispatch({ type: 'AUTH_SIGNOUT' });
     navigate('loginFlow');
 };
