@@ -126,7 +126,7 @@ const fetchSchedulePattern = dispatch => async () => {
         let abort = axios.CancelToken.source();
         setTimeout(() => { abort.cancel(`Timeout`) }, 5000);
 
-        const response = await easymoveinApi.get('/get_schedule_pattern.php', { cancelToken: abort.token });
+        const response = await easymoveinApi.get('/get_schedule_pattern.php');
         await AsyncStorage.setItem('serverSchedulePattern', JSON.stringify(response.data));
         dispatch({ type: 'SCHEDULE_PATTERN_FETCH', payload: response.data });
     } catch (error) {
@@ -145,7 +145,7 @@ const fetchSchedule = dispatch => async () => {
         let abort = axios.CancelToken.source();
         setTimeout(() => { abort.cancel(`Timeout`) }, 5000);
 
-        const response = await easymoveinApi.get('/get_schedule.php?block='+ block, { cancelToken: abort.token });
+        const response = await easymoveinApi.get('/get_schedule.php?block='+ block);
         const data = response.data || [];
         const masterUnit = data.master_unit || [];
         const uniqTower = _.uniq(_.map(masterUnit, 'tower'));

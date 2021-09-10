@@ -205,7 +205,7 @@ const fetchAsset = dispatch => async () => {
         let source = axios.CancelToken.source();
         setTimeout(() => { source.cancel(`Timeout`) }, 5000);
 
-        const response = await easymoveinApi.get('/get_asset.php', { cancelToken: source.token });
+        const response = await easymoveinApi.get('/get_asset.php');
         const data = response.data || [];
         const bafAsset = data.baf_asset || [];
 
@@ -232,7 +232,7 @@ const fetchComplaint = dispatch => async () => {
         let source = axios.CancelToken.source();
         setTimeout(() => { source.cancel(`Timeout`) }, 5000);
         
-        const response = await easymoveinApi.get('/get_list_report.php?block=' + block + '&profile_id=' + profileID + '&id_user=' + userID, { cancelToken: source.token });
+        const response = await easymoveinApi.get('/get_list_report.php?block=' + block + '&profile_id=' + profileID + '&id_user=' + userID);
         const data = response.data || [];
         const bafReport = data.baf_report || [];
 
@@ -257,7 +257,7 @@ const fetchLog = dispatch => async () => {
         let source = axios.CancelToken.source();
         setTimeout(() => { source.cancel(`Timeout`) }, 5000);
         
-        const response = await easymoveinApi.get('/get_baf_log.php?id_user=' + userID, { cancelToken: source.token });
+        const response = await easymoveinApi.get('/get_baf_log.php?id_user=' + userID);
         const data = response.data || [];
         const bafLog = data.baf_log || [];
 
@@ -282,7 +282,7 @@ const fetchPendingReport = dispatch => async () => {
         let source = axios.CancelToken.source();
         setTimeout(() => { source.cancel(`Timeout`) }, 10000);
 
-        const response = await easymoveinApi.get('/get_pending_report.php?block=' + userDetail.data.absensi_block, { cancelToken: source.token });
+        const response = await easymoveinApi.get('/get_pending_report.php?block=' + userDetail.data.absensi_block);
         const data = response.data || [];
         const pendingReport = data.pending_report || [];
 
@@ -304,7 +304,7 @@ const fetchCategory = dispatch => async () => {
         let source = axios.CancelToken.source();
         setTimeout(() => { source.cancel(`Timeout`) }, 5000);
 
-        const response = await easymoveinApi.get('/get_category.php', { cancelToken: source.token });
+        const response = await easymoveinApi.get('/get_category.php');
         const data = response.data || [];
         const category = data.category || [];
         // title: "Keamanan",
@@ -374,7 +374,7 @@ const doPostReport = dispatch => async (val) => {
             let source = axios.CancelToken.source();
             setTimeout(() => { source.cancel(`Timeout`) }, 5000);
 
-            await easymoveinApi.post('/post_baf_log.php', JSON.stringify(bafLogData), { cancelToken: source.token })
+            await easymoveinApi.post('/post_baf_log.php', JSON.stringify(bafLogData))
                 .then( async (res) => {
                     console.log(res);
                     if(res.status){
@@ -393,7 +393,7 @@ const doPostReport = dispatch => async (val) => {
                             let abort = axios.CancelToken.source();
                             setTimeout(() => { abort.cancel(`Timeout`) }, 5000);
 
-                            const response = await easymoveinApi.post('/post_report.php', JSON.stringify(uploadData), { cancelToken: abort.token });
+                            const response = await easymoveinApi.post('/post_report.php', JSON.stringify(uploadData));
                             
                             if(response.data.status == true){
                                 // DO DELETE LOCAL DATA
@@ -457,7 +457,7 @@ const doPostResolve = dispatch => async (val) => {
             let abort = axios.CancelToken.source();
             setTimeout(() => { abort.cancel(`Timeout`) }, 5000);
 
-            const response = await easymoveinApi.post('/post_resolve.php', JSON.stringify(uploadData), { cancelToken: abort.token });
+            const response = await easymoveinApi.post('/post_resolve.php', JSON.stringify(uploadData));
             if(response.data.status == true){
                 // DO DELETE LOCAL DATA
                 const newListReportItem = tempItem.filter(v => v != headerLocal);

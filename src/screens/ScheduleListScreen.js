@@ -19,6 +19,7 @@ const ScheduleListScreen = ({ navigation, showActiveOnly, parentComponent }) => 
     const defaultTower = uniqTower[0] || '';
     const [activeTower, setActiveTower] = useState(defaultTower);
     const dataUnit = (master_unit || []).filter(v => v.tower == activeTower);
+    console.log((userDetail || {}).data);
     // if(Object.keys(currentShift).length == 0){
     //     return (<>
     //         <NavigationEvents onWillFocus={getCurrentShift} />
@@ -92,14 +93,19 @@ export const getStatusFloor = (blocks, floor, tower) => {
     const { userDetail } = authState;
     const { listLog } = reportState;
 
-    if(!currentShift.start && currentShift.start != 0) return 'future';
-    
+    // if(!currentShift.start && currentShift.start != 0) return 'future';
+    const hourNow = moment().format('H');
+    const startDateTime = moment(((userDetail || {}).data || {}).start_datetime).format('YYYY-MM-DD HH:mm:ss');
+    const endDateTime = moment(((userDetail || {}).data || {}).end_datetime).format('YYYY-MM-DD HH:mm:ss');
+    const dateNow = moment().format('YYYY-MM-DD HH:mm:ss');
+
+    if(dateNow < startDateTime && dateNow > endDateTime) return 'future';
+
     let job = ((userDetail || {}).data || {}).profile_id;
     // if(['21','14','12'].includes(job) === false) job = 12;
     
     // untuk dapat jam ke berapa dr shift tsb, 
     // e.g. jam ke 1 dari shift
-    const hourNow = moment().format('H');
     
     const activeBlock = (schedulePattern || []).find(v => v.block == blocks && v.job == job) || {};
     const blockPattern = activeBlock.patterns || [];
@@ -108,7 +114,9 @@ export const getStatusFloor = (blocks, floor, tower) => {
     const floorTower = floor + '_' + tower;
 
     let inactiveFloor = '';
-    for(let i=0; i < hourNow; i++){
+    
+    const startHour = parseInt(moment(startDateTime).format('H'));
+    for(let i=startHour; i <= hourNow; i++){
         const floors = blockPattern[i] || '';
         inactiveFloor += floors + ',';
     }
