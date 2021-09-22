@@ -3,14 +3,27 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert } from "rea
 import Svg, { Rect } from "react-native-svg";
 import { NavigationEvents } from "react-navigation";
 import { Context as ReportContext } from '../context/ReportContext';
+import { Context as AuthContext } from '../context/AuthContext';
+import moment from 'moment';
 
 const ReportZoneScreen = ({ navigation }) => {
+    const { state: authState } = useContext(AuthContext);
     const { state, setCurrentZone, resetReportTemp } = useContext(ReportContext);
     const { block_name, blocks, tower, floor, parentScreen } = navigation.state.params;
     const { currentReportZone, listLog, listComplaint } =  state;
+    const { userDetail } = authState;
+
+    const startDateTime = moment(((userDetail || {}).data || {}).start_datetime).format('YYYY-MM-DD HH:mm:ss');
+    const endDateTime = moment(((userDetail || {}).data || {}).end_datetime).format('YYYY-MM-DD HH:mm:ss');
+
 
     const onChooseZone = async (zone) => {
-        const isDone = listLog.find(z => z.zone == zone && z.blocks == blocks && z.floor == floor && z.tower == tower);
+        const isDone = listLog.find(z => z.zone == zone && z.blocks == blocks && z.floor == floor && z.tower == tower
+                            && (
+                                moment(z.created_at).format('YYYY-MM-DD HH:mm:ss') >= startDateTime
+                                && moment(z.created_at).format('YYYY-MM-DD HH:mm:ss') <= endDateTime
+                            )
+                        );
         if(isDone && parentScreen == 'Report') return;
         const floorName = blocks + ' - ' + tower + ' - ' + floor + ' - Zone ' + zone;
         await setCurrentZone({blocks, tower, floor, zone});
@@ -22,7 +35,12 @@ const ReportZoneScreen = ({ navigation }) => {
     };
     const checkZoneStored = (zone) => {
         if(parentScreen == 'Report'){
-            const isDone = listLog.find(z => z.zone == zone && z.blocks == blocks && z.floor == floor && z.tower == tower);
+            const isDone = listLog.find(z => z.zone == zone && z.blocks == blocks && z.floor == floor && z.tower == tower
+                                        && (
+                                            moment(z.created_at).format('YYYY-MM-DD HH:mm:ss') >= startDateTime
+                                            && moment(z.created_at).format('YYYY-MM-DD HH:mm:ss') <= endDateTime
+                                        )
+                                    );
 
             if(zone==4) return isDone ? "grey" : "green";
             if(zone==3) return isDone ? "grey" : "blue";

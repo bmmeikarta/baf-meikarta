@@ -19,7 +19,7 @@ const ScheduleListScreen = ({ navigation, showActiveOnly, parentComponent }) => 
     const defaultTower = uniqTower[0] || '';
     const [activeTower, setActiveTower] = useState(defaultTower);
     const dataUnit = (master_unit || []).filter(v => v.tower == activeTower);
-    console.log((userDetail || {}).data);
+    // console.log((userDetail || {}).data);
     // if(Object.keys(currentShift).length == 0){
     //     return (<>
     //         <NavigationEvents onWillFocus={getCurrentShift} />
@@ -99,7 +99,7 @@ export const getStatusFloor = (blocks, floor, tower) => {
     const endDateTime = moment(((userDetail || {}).data || {}).end_datetime).format('YYYY-MM-DD HH:mm:ss');
     const dateNow = moment().format('YYYY-MM-DD HH:mm:ss');
 
-    if(dateNow < startDateTime && dateNow > endDateTime) return 'future';
+    if(dateNow < startDateTime || dateNow > endDateTime) return 'future';
 
     let job = ((userDetail || {}).data || {}).profile_id;
     // if(['21','14','12'].includes(job) === false) job = 12;
@@ -116,16 +116,26 @@ export const getStatusFloor = (blocks, floor, tower) => {
     let inactiveFloor = '';
     
     const startHour = parseInt(moment(startDateTime).format('H'));
-    for(let i=startHour; i <= hourNow; i++){
-        const floors = blockPattern[i] || '';
+    let pastHour = parseInt(startHour);
+    
+    while(pastHour != hourNow){
+        const floors = blockPattern[pastHour] || '';
         inactiveFloor += floors + ',';
+        pastHour++;
+        if(pastHour >= 24) pastHour = 0; // Agar kembali ke 0
+        
     }
 
     const floorSkippedIDX = inactiveFloor.split(',');
     // console.log(activeBlock);
     const canAccess = floorSkippedIDX.includes(floorTower) || activeIDX.includes(floorTower);
     
-    const checkZoneReport = listLog.filter(v => v.blocks == blocks && v.floor == floor && v.tower == tower);
+    const checkZoneReport = listLog.filter(v => v.blocks == blocks && v.floor == floor && v.tower == tower 
+                                            && (
+                                                moment(v.created_at).format('YYYY-MM-DD HH:mm:ss') >= startDateTime
+                                                && moment(v.created_at).format('YYYY-MM-DD HH:mm:ss') <= endDateTime
+                                            )
+                                    );
     
     if(checkZoneReport.length > 0 && checkZoneReport.length < 4 && canAccess) return 'on progress';
     if(checkZoneReport.length == 4) return 'done';
@@ -137,7 +147,12 @@ export const getStatusFloor = (blocks, floor, tower) => {
 
 const RenderRow = ({ block, tower, floor, statusFloor, parentComponent }) => {
     const { state: reportState } = useContext(ReportContext);
+    const { state: authState } = useContext(AuthContext);
     const { listLog } = reportState;
+    const { userDetail } = authState;
+
+    const startDateTime = moment(((userDetail || {}).data || {}).start_datetime).format('YYYY-MM-DD HH:mm:ss');
+    const endDateTime = moment(((userDetail || {}).data || {}).end_datetime).format('YYYY-MM-DD HH:mm:ss');
 
     let bgFloor = '#ff9cf5';
     let bgZone = '#000';
@@ -160,7 +175,12 @@ const RenderRow = ({ block, tower, floor, statusFloor, parentComponent }) => {
             <View style={[styles.items, { backgroundColor: `${bgFloor}` }]}><Text style={styles.textStyle}>{floor}</Text></View>
             {[1,2,3,4].map((zone, key) => {
                 let newBgZone = bgZone;
-                const isDone = listLog.find(z => z.zone == zone && z.blocks == block && z.floor == floor && z.tower == tower);
+                const isDone = listLog.find(z => z.zone == zone && z.blocks == block && z.floor == floor && z.tower == tower
+                                    && (
+                                        moment(z.created_at).format('YYYY-MM-DD HH:mm:ss') >= startDateTime
+                                        && moment(z.created_at).format('YYYY-MM-DD HH:mm:ss') <= endDateTime
+                                    )
+                                );
                 
                 if(statusFloor == 'on progress' && isDone) newBgZone = '#41db30';
                 return <TouchableOpacity key={key} style={[styles.items, { backgroundColor: `${newBgZone}` }]}></TouchableOpacity >

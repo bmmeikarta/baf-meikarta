@@ -90,6 +90,7 @@ const addReportItem = dispatch => async(data) => {
         const token = await AsyncStorage.getItem('token');
         const userDetail = jwtDecode(token);
         let shift = userDetail.data.shift;
+        let absensi_id = userDetail.data.absensi_id;
         const id_user = userDetail.data.id_user;
 
         //BYPASS ADMIN, DELETE LATER
@@ -102,6 +103,7 @@ const addReportItem = dispatch => async(data) => {
         // =============================================
 
         data.shift_id = shift;
+        data.absensi_id = absensi_id;
         data.created_by = id_user;
         data.created_at = moment().format('YYYY-MM-DD HH:mm:ss');
 
