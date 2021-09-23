@@ -40,7 +40,7 @@ const CheckInScreen = ({ navigation }) => {
         <Timer label={`Next Check-In`} getCurrentShift={getCurrentShift}></Timer>
         <View style={styles.row}>
 
-          {[1,2,3,4,5,6,7,8,9].map((zone, key) => {
+          {[1,2,3,4,5,6,7,8,9,10].map((zone, key) => {
             let bgFloor = '#000';
             const canAccess = true;
             const isChecked = listCheckIn.find(c => c.zone == zone && moment(c.created_at).format('YYYY-MM-DD HH') == moment().format('YYYY-MM-DD HH'));

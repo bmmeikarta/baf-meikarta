@@ -6,6 +6,7 @@ import easymoveinApi from "../api/easymovein";
 import moment from "moment";
 import jwtDecode from "jwt-decode";
 import axios from "axios";
+import _ from "lodash";
 
 const reportReducer = (state, action) => {
     switch (action.type) {
@@ -35,7 +36,10 @@ const reportReducer = (state, action) => {
         case 'REPORT_SET_LIST_SCAN':
             return { ...state, listReportScan: [...state.listReportScan, action.payload] }
         case 'REPORT_SET_LIST_UPLOAD':
-            return { ...state, listReportUpload: [...state.listReportUpload, action.payload] }
+            const filtered = state.listReportUpload.filter(v => v.sku_code != action.payload.sku_code);     
+            return { ...state, listReportUpload: [ ...filtered, action.payload] }
+        case 'REPORT_REMOVE_UPLOAD':
+            return { ...state, listReportUpload: filtered }
         case 'REPORT_RESET_LIST_SCAN':
             return { ...state, listReportScan: [] }
         case 'REPORT_RESET_LIST_UPLOAD':
@@ -177,6 +181,10 @@ const addUploadItem = dispatch => async(data) => {
     dispatch({ type: 'REPORT_SET_LIST_UPLOAD', payload: data });
 };
 
+const removeUploadItem = dispatch => async(data) => {
+    dispatch({ type: 'REPORT_REMOVE_UPLOAD', payload: data });
+};
+
 const setCurrentZone = dispatch => async(data) => {
     try {
         const localAsset = JSON.parse(await AsyncStorage.getItem('localAssetItem')) || [];
@@ -306,9 +314,15 @@ const fetchCategory = dispatch => async () => {
         let source = axios.CancelToken.source();
         setTimeout(() => { source.cancel(`Timeout`) }, 5000);
 
+        const token = await AsyncStorage.getItem('token');
+        const userDetail = jwtDecode(token);
+        const profileID = userDetail.data.profile_id;
+
         const response = await easymoveinApi.get('/get_category.php');
         const data = response.data || [];
-        const category = data.category || [];
+        let category = data.category || [];
+        // JIKA BUKAN DANRU
+        if(profileID != 28) category = category.filter(cat => cat.sku_code != '4');
         // title: "Keamanan",
         // questions: [
         //     { 
@@ -364,75 +378,22 @@ const fetchCategory = dispatch => async () => {
 
 const doPostReport = dispatch => async (val) => {
     try {
-        const localReportItem = JSON.parse(await AsyncStorage.getItem('localReportItem')) || [];
-        let tempReportItem = localReportItem;
-        await localReportItem.map( async headerLocal => {
-            dispatch({ type: 'REPORT_SET_LOADING', payload: true });
-            const bafLogData = {
-                data: { ...headerLocal, listReportUpload: [] },
-            }
-            let tempItem = headerLocal;
+        const localReportItem = await JSON.parse(await AsyncStorage.getItem('localReportItem')) || [];
+        const uploadData = await new Promise.all(localReportItem.map(async header => {
+            header.listReportUpload = await new Promise.all(header.listReportUpload.map(async detail => {
+                const base64 = await FileSystem.readAsStringAsync(detail.photo_before || '', { encoding: 'base64' });
+                detail.photo = base64;
+                return detail;
+            }));
+            return header;
+        }));
 
-            let source = axios.CancelToken.source();
-            setTimeout(() => { source.cancel(`Timeout`) }, 5000);
+        const res = await easymoveinApi.post('/post_report_v2.php', JSON.stringify(uploadData));
+        const error = _.union(res.data.error);
+        if(res.data.error > 0) return Alert.alert('Error', error.join('\n\n'));
 
-            await easymoveinApi.post('/post_baf_log.php', JSON.stringify(bafLogData))
-                .then( async (res) => {
-                    console.log(res);
-                    if(res.status){
-                        const listReportUpload = headerLocal.listReportUpload || [];
-                        await listReportUpload.map(async itemUpload => {
-                            const photo = itemUpload.photo_before || '';
-                            // console.log('>>>>', itemUpload)
-                            const base64 = await FileSystem.readAsStringAsync(photo, { encoding: 'base64' });
-                            
-                            const uploadData = {
-                                data: { ...headerLocal, ...itemUpload, listReportUpload: [] },
-                                photo: base64
-                            }
-                            // formData.append('photo', image);
-
-                            let abort = axios.CancelToken.source();
-                            setTimeout(() => { abort.cancel(`Timeout`) }, 5000);
-
-                            const response = await easymoveinApi.post('/post_report.php', JSON.stringify(uploadData));
-                            
-                            if(response.data.status == true){
-                                // DO DELETE LOCAL DATA
-                                console.log('>>>>>>>>>>>>>>>');
-                                console.log(tempItem)
-                                // console.log(tempItem.find(v => v == headerLocal));
-                                const newListReportUpload = (tempItem.listReportUpload || []).filter(v => v != itemUpload);
-                                const newListReportItem = tempReportItem.filter(v => v != headerLocal);
-                                tempItem = [ ...newListReportItem, {...headerLocal, listReportUpload: newListReportUpload} ];
-                                
-
-                                await AsyncStorage.setItem('localReportItem', JSON.stringify(tempItem));
-                            }else{
-                                const errMsg = response.data.message;
-                                Alert.alert('Error', `Failed to upload report, you're offline now, please sync your data every 1 hour`)
-                            }
-                            console.log('================');
-                            console.log(response.data);
-                        });
-                    }
-                })
-                .catch((res) => {
-                    console.log(res);
-                    Alert.alert('Info', `Failed sync to baf_log, you're offline now, please sync your data every 1 hour`);
-                    dispatch({ type: 'REPORT_SET_LOADING', payload: false });
-                });
-
-                if(tempItem.listReportUpload.length == 0){
-                    // DO DELETE LOCAL DATA
-                    const newListReportItem = localReportItem.filter(v => v != headerLocal);
-                    tempReportItem = newListReportItem;
-
-                    await AsyncStorage.setItem('localReportItem', JSON.stringify(newListReportItem));
-                }
-
-            dispatch({ type: 'REPORT_SET_LOCAL_LIST_ITEM', payload: tempReportItem });
-        })
+        await AsyncStorage.removeItem('localReportItem');
+        dispatch({ type: 'REPORT_SET_LOCAL_LIST_ITEM', payload: [] });
     } catch (error) {
         console.log(error);
         // processError(error);
@@ -504,7 +465,7 @@ const defaultList = {
 
 export const { Provider, Context} = createDataContext(
     reportReducer,
-    { doPostReport, doPostResolve, fetchAsset, fetchComplaint, fetchLog, fetchPendingReport, fetchCategory, getReportState, addReportItem, addReportResolve, addScanItem, addUploadItem, setCurrentZone, setCurrentScan, resetReportScan, resetReportTemp, deleteScanItem, localToState },
+    { doPostReport, doPostResolve, fetchAsset, fetchComplaint, fetchLog, fetchPendingReport, fetchCategory, getReportState, addReportItem, addReportResolve, addScanItem, addUploadItem, removeUploadItem, setCurrentZone, setCurrentScan, resetReportScan, resetReportTemp, deleteScanItem, localToState },
 
     // default state reduce
     { loading: false, listAsset: [], listComplaint: [], listLog: [], listPendingReport: [], listReportItem: [], listCategory: [], listReportResolve: [], listReportUpload: [], listReportScan: [], currentReportAsset:[], currentReportZone: {}, currentReportScan: {} }

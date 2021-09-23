@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, ScrollView, Alert } from "react-native";
 import { Button } from "react-native-elements";
 import { NavigationEvents } from "react-navigation";
 import { Context as ReportContext } from '../context/ReportContext';
+import { Context as AuthContext } from '../context/AuthContext';
 
 import List, { List as ListModel } from "../components/accordion/List";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -10,13 +11,16 @@ import _ from "lodash";
 
 const ReportDetailScreen = ({ navigation }) => {
   const { state, getReportState, addReportItem } = useContext(ReportContext);
+  const { state: authState } = useContext(AuthContext);
   const { currentReportZone, currentReportAsset, listReportScan, listReportUpload, listCategory } = state;
   const { headerTitle } = navigation.state.params;
   const [checkList, setCheckList] = useState([]);
 
+  const profileID = authState.userDetail.data.profile_id;
+
   // console.log('Asset Item', currentReportAsset);
   const validationSubmit = () => {
-    if(checkList.length < 3){
+    if(checkList.length < 3 || (profileID == 28 && checkList.length < 4)){
       Alert.alert('Info', 'Please complete the form');
       return false;
     }

@@ -106,7 +106,7 @@ const HomeScreen = ({ navigation }) => {
         await NetInfo.fetch().then(async state => {
             if (state.isConnected) {
                 await doPostReport();
-                await doPostResolve();
+                // await doPostResolve();
 
                 await fetchAsset();
                 await fetchLog();

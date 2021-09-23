@@ -7,11 +7,14 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import { Context as ReportContext } from '../../context/ReportContext';
+import { TextInput } from "react-native-gesture-handler";
+import Textarea from 'react-native-textarea';
 
 const ContainerImagePicker = ({category, problem, idAsset, assetQR, sku_code }) => {
-    const { state, addUploadItem } = useContext(ReportContext);
+    const { state, addUploadItem, removeUploadItem } = useContext(ReportContext);
     const { listReportUpload } = state;
 
+    const [detail, setDetail] = useState('');
     const [pickedImage, setPickedImage] = useState();
     const [uploadItem, setUploadItem] = useState({
         category: category,
@@ -24,7 +27,12 @@ const ContainerImagePicker = ({category, problem, idAsset, assetQR, sku_code }) 
     const afterTakingImage = (data) => {
         addUploadItem(data);
         // addReportItem({ ...currentReportZone, data });
-      }
+    }
+
+    const onChangeDetail = (text) => {
+        setDetail(text);
+        addUploadItem({ ...uploadItem, description: text });
+    }
 
     const takeImageHandler = async () => {
         try {
@@ -42,6 +50,7 @@ const ContainerImagePicker = ({category, problem, idAsset, assetQR, sku_code }) 
             MediaLibrary.createAlbumAsync('BAF Meikarta', asset, true)
             .then((res) => {
                 console.log('File Saved Successfully!');
+                setUploadItem({ ...uploadItem, photo_before: asset.uri });
                 afterTakingImage({ ...uploadItem, photo_before: asset.uri });
                 setPickedImage(asset.uri);
             })
@@ -97,7 +106,14 @@ const ContainerImagePicker = ({category, problem, idAsset, assetQR, sku_code }) 
                   }
               </View>
               <View style={styles.detailCol}>
-                  <Text>{'Status'}</Text>
+                <Textarea
+                    containerStyle={styles.input}
+                    onChangeText={(text) => onChangeDetail(text)}
+                    defaultValue={detail}
+                    maxLength={250}
+                    underlineColorAndroid={'transparent'}
+                />
+                  {/* <Text>{'Status'}</Text> */}
               </View>
           </Animated.View>
     </>)
@@ -109,6 +125,14 @@ const styles = StyleSheet.create({
         backgroundColor: '#b8b8b8',
         paddingVertical: 8,
         paddingHorizontal: 30,
+    },
+    input: {
+        backgroundColor: '#fff',
+        borderWidth:1,
+        marginHorizontal:10,
+        borderRadius:5,
+        width: 150,
+        height: 100
     },
     detail: {
         backgroundColor: "#ebebeb",

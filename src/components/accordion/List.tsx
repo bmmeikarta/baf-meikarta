@@ -10,6 +10,7 @@ import Animated, {
   withTiming,
   runOnUI,
 } from "react-native-reanimated";
+import { Context as AuthContext } from '../../context/AuthContext';
 import Chevron from "./Chevron";
 import Item, { ListItem } from "./ListItem";
 import Checkmark from "./Checkmark";
@@ -27,6 +28,10 @@ interface ListProps {
 }
 
 const List = ({ navigation, list, category, onPressCheckList }) => {
+  const { state } = useContext(AuthContext);
+  const { userDetail } = state;
+  const profileID = userDetail.data.profile_id;
+  
   const aref = useAnimatedRef<View>();
   const arefChild = useAnimatedRef<View>();
   const open = useSharedValue(false);
@@ -67,7 +72,12 @@ const List = ({ navigation, list, category, onPressCheckList }) => {
               }}
             >
               <Animated.View style={{marginRight: 30}}>
-                <Checkmark {...{ checkmarkProgress }} size={20} activeColor={null}/>
+                {(() => {
+                  if(profileID == 28 && list.sku_code == '4'){
+                    return <></>;
+                  }
+                  return <Checkmark {...{ checkmarkProgress }} size={20} activeColor={null}/>;
+                })()}
               </Animated.View>
             </TouchableWithoutFeedback>
 
@@ -84,7 +94,12 @@ const List = ({ navigation, list, category, onPressCheckList }) => {
               }}
             >
               <Animated.View>
-                <Chevron {...{ progress }} />
+                {(() => {
+                  if(profileID == 28 && list.sku_code == '4'){
+                    return <Checkmark {...{ checkmarkProgress: progress }} size={20} activeColor={null}/>
+                  }
+                  return <Chevron {...{ progress }} />
+                })()}
               </Animated.View>
             </TouchableWithoutFeedback>
           </View>
