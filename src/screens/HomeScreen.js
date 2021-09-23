@@ -11,8 +11,10 @@ import { Ionicons } from "@expo/vector-icons";
 import NetInfo, { addEventListener, configure, useNetInfo } from "@react-native-community/netinfo";
 import _ from "lodash";
 import easymoveinApi from "../api/easymovein";
-import Constants from "expo-constants"
-
+import Constants from "expo-constants";
+import * as MediaLibrary from 'expo-media-library';
+import * as FileSystem from 'expo-file-system';
+import * as Camera from 'expo-camera';
 
 const HomeScreen = ({ navigation }) => {
     const { state: authState } = useContext(AuthContext);
@@ -106,7 +108,7 @@ const HomeScreen = ({ navigation }) => {
         await NetInfo.fetch().then(async state => {
             if (state.isConnected) {
                 await doPostReport();
-                // await doPostResolve();
+                await doPostResolve();
 
                 await fetchAsset();
                 await fetchLog();
@@ -127,6 +129,25 @@ const HomeScreen = ({ navigation }) => {
         
     };
     // console.log(listAsset.length);
+
+    const data = [
+        { firstName: 'TEST', lastName: 'TEST' },
+        { firstName: 'TEST 2', lastName: 'TEST 2' },
+    ];
+
+
+    // write the file
+    saveFile = async () => {
+        const { status } = await Camera.requestPermissionsAsync();
+        
+        if (status === "granted") {
+            let fileUri = FileSystem.documentDirectory + `${moment().format('YYYYMMDDHHmm')}.txt`;
+            await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(data), { encoding: FileSystem.EncodingType.UTF8 });
+            const asset = await MediaLibrary.createAssetAsync(fileUri);
+            console.log(asset);
+            await MediaLibrary.createAlbumAsync("BAF LOG", asset, false);
+        }
+    }
     return (
     <>
         <NavigationEvents 
@@ -153,7 +174,11 @@ const HomeScreen = ({ navigation }) => {
                     </View>
                 }
                 <View style={styles.headerButton}>
-                    
+                    <Button
+                        buttonStyle={{ width: 90, alignSelf: "flex-end", backgroundColor: "darkblue"}}
+                        onPress={(e) => saveFile()}
+                        title="Download Log"
+                    ></Button>
                     <Button
                         buttonStyle={{ width: 90, alignSelf: "flex-end", backgroundColor: "purple"}}
                         onPress={() => !loading ? onSyncData() : null}
