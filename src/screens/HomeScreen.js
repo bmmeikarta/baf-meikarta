@@ -174,11 +174,11 @@ const HomeScreen = ({ navigation }) => {
                     </View>
                 }
                 <View style={styles.headerButton}>
-                    <Button
+                    {/* <Button
                         buttonStyle={{ width: 90, alignSelf: "flex-end", backgroundColor: "darkblue"}}
                         onPress={(e) => saveFile()}
                         title="Download Log"
-                    ></Button>
+                    ></Button> */}
                     <Button
                         buttonStyle={{ width: 90, alignSelf: "flex-end", backgroundColor: "purple"}}
                         onPress={() => !loading ? onSyncData() : null}

@@ -8,6 +8,21 @@ import jwtDecode from "jwt-decode";
 import axios from "axios";
 import _ from "lodash";
 
+const processError = (error) => {
+    console.log(error);
+    if(error.response.status == 401){
+        Alert.alert('Authorization Failed', 'Silahkan melakukan login kembali', [
+            { 
+                text: 'Ok',
+                onPress: async () => {
+                    await AsyncStorage.removeItem('token');
+                    navigate('loginFlow');
+                }
+            }
+        ])
+    }
+}
+
 const reportReducer = (state, action) => {
     switch (action.type) {
         case 'REPORT_SET_TEST':
@@ -396,7 +411,7 @@ const doPostReport = dispatch => async (val) => {
         dispatch({ type: 'REPORT_SET_LOCAL_LIST_ITEM', payload: [] });
     } catch (error) {
         console.log(error);
-        // processError(error);
+        processError(error);
         dispatch({ type: 'REPORT_SET_LOADING', payload: false });
     }
 };
