@@ -148,6 +148,9 @@ const HomeScreen = ({ navigation }) => {
             await MediaLibrary.createAlbumAsync("BAF LOG", asset, false);
         }
     }
+
+    const profileID = ((userDetail || {}).data || {}).profile_id;
+
     return (
     <>
         <NavigationEvents 
@@ -212,7 +215,7 @@ const HomeScreen = ({ navigation }) => {
                     onPress={()=> !loading ? navigation.navigate('ScheduleList') : null} 
                 />
                 <View style={styles.row}>
-                    {((userDetail || {}).data || {}).profile_id == 28 &&
+                    {(profileID == 28 || profileID == 36 || profileID == 37)  &&
                         <View style={styles.container}>
                             <Button 
                                 buttonStyle={[styles.buttonChild, { backgroundColor: '#eb8015' }]}
@@ -221,7 +224,7 @@ const HomeScreen = ({ navigation }) => {
                             />
                         </View>
                     }
-                    {((userDetail || {}).data || {}).profile_id != 28 &&
+                    {(profileID != 28 && profileID != 36 && profileID != 37) &&
                         <View style={styles.container}>
                             <Button 
                                 buttonStyle={[styles.buttonChild, { backgroundColor: '#eb8015' }]}
