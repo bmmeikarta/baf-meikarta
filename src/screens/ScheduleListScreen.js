@@ -138,7 +138,7 @@ export const getStatusFloor = (blocks, floor, tower) => {
                                     );
     
     if(checkZoneReport.length > 0 && checkZoneReport.length < 4 && canAccess) return 'on progress';
-    if(checkZoneReport.length == 4) return 'done';
+    if(checkZoneReport.length >= 4) return 'done';
     if(canAccess) return 'active';
 
     return 'future';

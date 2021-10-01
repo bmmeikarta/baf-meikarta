@@ -337,7 +337,7 @@ const fetchCategory = dispatch => async () => {
         const data = response.data || [];
         let category = data.category || [];
         // JIKA BUKAN DANRU
-        if(profileID != 28) category = category.filter(cat => cat.sku_code != '4');
+        if(profileID != 28 && profileID != 36 && profileID != 37) category = category.filter(cat => cat.sku_code != '4');
         // title: "Keamanan",
         // questions: [
         //     { 

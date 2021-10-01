@@ -20,7 +20,7 @@ const ReportDetailScreen = ({ navigation }) => {
 
   // console.log('Asset Item', currentReportAsset);
   const validationSubmit = () => {
-    if(checkList.length < 3 || (profileID == 28 && checkList.length < 4)){
+    if(checkList.length < 3 || ((profileID == 28 || profileID == 36 || profileID == 37) && checkList.length < 4)){
       Alert.alert('Info', 'Please complete the form');
       return false;
     }
