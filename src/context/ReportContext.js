@@ -333,7 +333,7 @@ const fetchCategory = dispatch => async () => {
         const userDetail = jwtDecode(token);
         const profileID = userDetail.data.profile_id;
 
-        const response = await easymoveinApi.get('/get_category.php');
+        const response = await easymoveinApi.get(`/get_category.php?profile_id=${profileID}`);
         const data = response.data || [];
         let category = data.category || [];
         // JIKA BUKAN DANRU
