@@ -17,7 +17,7 @@ const ContainerImagePicker = ({category, problem, idAsset, assetQR, sku_code }) 
     const [detail, setDetail] = useState('');
     const [pickedImage, setPickedImage] = useState();
     const [uploadItem, setUploadItem] = useState({
-        category: category,
+        category: category.trim(),
         problem,
         id_asset: idAsset,
         sku_code,

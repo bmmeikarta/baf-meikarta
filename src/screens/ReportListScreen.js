@@ -11,15 +11,20 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ReportListScreen = ({ navigation }) => {
   const { state: authState } = useContext(AuthContext);
-  const { state: reportState, resetReportScan } = useContext(ReportContext);
+  const { state: reportState, resetReportScan, setCurrentZone } = useContext(ReportContext);
   const { state, fetchSchedule, fetchSchedulePattern, getCurrentShift, getActiveFloor } = useContext(ScheduleContext);
   const { master_unit, activeFloor, currentShift, schedulePattern } = state;
   const { userDetail } = authState;
 
   const uniqTower = _.uniq(_.map(master_unit, 'tower')) || [];
+  const uniqBlock = _.uniq(_.map(master_unit, 'blocks')) || [];
   const defaultTower = uniqTower[0] || '';
+  const defaultBlock = uniqBlock[0] || '';
+
   const [activeTower, setActiveTower] = useState(defaultTower);
-  const dataUnit = (master_unit || []).filter(v => v.tower == activeTower);
+  const [activeBlock, setActiveBlock] = useState(defaultBlock);
+
+  const dataUnit = (master_unit || []).filter(v => v.blocks == activeBlock && v.tower == activeTower);
 
   return (
     <>
@@ -42,6 +47,15 @@ const ReportListScreen = ({ navigation }) => {
         }
         <View style={{ marginBottom: 20, flexDirection: 'row', justifyContent: "center", }}>
             {
+                uniqBlock.map(block => {
+                    let bgFilter = 'white';
+                    if(block == activeBlock) bgFilter = '#3f77d9'; 
+                    if(block) return <TouchableOpacity key={block} onPress={() => setActiveBlock(block)} style={[styles.filterBlock, { backgroundColor: `${bgFilter}`}]}><Text style={styles.textTimer}>{block}</Text></TouchableOpacity >
+                })
+            }
+        </View>
+        <View style={{ marginBottom: 20, flexDirection: 'row', justifyContent: "center", }}>
+            {
                 uniqTower.map(tower => {
                     let bgFilter = 'white';
                     if(tower == activeTower) bgFilter = 'orange'; 
@@ -61,10 +75,19 @@ const ReportListScreen = ({ navigation }) => {
 
             const canAccess = statusFloor == 'active' || statusFloor == 'on progress';
             
+            let nextScreen = 'ReportZone';
+            if(v.floor == 'Top' || v.floor == 'Bottom') nextScreen = 'ReportDetail';
+            
+            const goToNextScreen = async (nextScreen) => {
+              const floorName = v.blocks + ' - ' + v.tower + ' - ' + v.floor;
+              await setCurrentZone({blocks: v.blocks, tower: v.tower, floor: v.floor, zone: '1'});
+              if(canAccess) navigation.navigate(nextScreen, { ...v, headerTitle: floorName, parentScreen: 'Report' });
+            }
+
             return <View key={key} style={styles.container}>
               <Button 
                 buttonStyle={{ backgroundColor: `${bgFloor}` }}
-                onPress={() => canAccess ? navigation.navigate('ReportZone', { ...v, parentScreen: 'Report' }) : null}
+                onPress={() => goToNextScreen(nextScreen)}
                 title={v.floor}
               />
             </View>
@@ -90,7 +113,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "flex-start",
-    paddingVertical: 10
+    paddingVertical: 10,
+    paddingBottom: 50
   },
   button: {
     height: 50,
@@ -122,6 +146,17 @@ const styles = StyleSheet.create({
       borderRadius: 5,
       width: 70,
       marginHorizontal: 5
+  },
+  filterBlock: {
+    backgroundColor: 'white',
+    borderColor: '#3f77d9',
+    borderWidth: 1,
+    alignSelf: 'center', 
+    paddingVertical: 5, 
+    paddingHorizontal: 10, 
+    borderRadius: 5,
+    width: 70,
+    marginHorizontal: 5
   }
 })
 

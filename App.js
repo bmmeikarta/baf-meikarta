@@ -55,6 +55,12 @@ const switchNavigator = createSwitchNavigator({
             headerTitle: ()=><Text style={styles.headerTitle}>{'CheckIn Scanner'}</Text>,
           }
         },
+        CheckItem: {
+          screen: ReportListScreen,
+          navigationOptions: {
+            headerTitle: ()=><Text style={styles.headerTitle}>{'Check Item'}</Text>,
+          }
+        }
       }),
       navigationOptions: {
         tabBarLabel: ()=>null,

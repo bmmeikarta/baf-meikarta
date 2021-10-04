@@ -140,23 +140,33 @@ const fetchSchedule = dispatch => async () => {
         const token = await AsyncStorage.getItem('token');
         const userDetail = jwtDecode(token);
         
-        const block = userDetail.data.absensi_block || '51022';
+        let block = userDetail.data.absensi_block || '51022';
         
         let abort = axios.CancelToken.source();
         setTimeout(() => { abort.cancel(`Timeout`) }, 5000);
 
+        if(block == 'Non Blocks') block = 'non_blocks';
+
         const response = await easymoveinApi.get('/get_schedule.php?block='+ block);
+
         const data = response.data || [];
         const masterUnit = data.master_unit || [];
         const uniqTower = _.uniq(_.map(masterUnit, 'tower'));
+        const uniqBlock = _.uniq(_.map(masterUnit, 'blocks'));
 
-        uniqTower.map(tower => {
-            const concatData = [
-                { blocks: masterUnit[0].blocks, block_name: masterUnit[0].block_name, floor: 'Rooftop', tower: tower },
-                { blocks: masterUnit[0].blocks, block_name: masterUnit[0].block_name, floor: 'Lobby', tower: tower }
-            ];
-            data.master_unit = data.master_unit.concat(concatData);
-        });
+        uniqBlock.map(block => {
+            const blocks = masterUnit.find(v => v.blocks = block);
+            uniqTower.map(tower => {
+                const concatData = [
+                    { blocks: block, block_name: blocks.block_name, floor: 'Rooftop', tower: tower },
+                    { blocks: block, block_name: blocks.block_name, floor: 'Lobby', tower: tower },
+                    { blocks: block, block_name: blocks.block_name, floor: 'Top', tower: tower },
+                    { blocks: block, block_name: blocks.block_name, floor: 'Bottom', tower: tower },
+                ];
+                data.master_unit = data.master_unit.concat(concatData);
+            });
+        })
+
         await AsyncStorage.setItem('serverSchedule', JSON.stringify(data));
         dispatch({ type: 'SCHEDULE_FETCH', payload: data });
     } catch (error) {

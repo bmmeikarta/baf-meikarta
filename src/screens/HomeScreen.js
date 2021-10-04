@@ -215,12 +215,21 @@ const HomeScreen = ({ navigation }) => {
                     onPress={()=> !loading ? navigation.navigate('ScheduleList') : null} 
                 />
                 <View style={styles.row}>
-                    {(profileID == 28 || profileID == 36 || profileID == 37)  &&
+                    {(profileID == 28 || profileID == 37)  &&
                         <View style={styles.container}>
                             <Button 
                                 buttonStyle={[styles.buttonChild, { backgroundColor: '#eb8015' }]}
                                 title="CHECK-IN" 
                                 onPress={()=> !loading ? navigation.navigate('CheckIn') : null} 
+                            />
+                        </View>
+                    }
+                    {(profileID == 36)  &&
+                        <View style={styles.container}>
+                            <Button 
+                                buttonStyle={[styles.buttonChild, { backgroundColor: '#eb8015' }]}
+                                title="ENGINEERING CHECK" 
+                                onPress={()=> !loading ? navigation.navigate('CheckItem') : null} 
                             />
                         </View>
                     }

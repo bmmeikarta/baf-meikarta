@@ -20,7 +20,7 @@ const ReportDetailScreen = ({ navigation }) => {
 
   // console.log('Asset Item', currentReportAsset);
   const validationSubmit = () => {
-    if(checkList.length < 3 || ((profileID == 28 || profileID == 36 || profileID == 37) && checkList.length < 4)){
+    if(checkList.length < listCategory.length){
       Alert.alert('Info', 'Please complete the form');
       return false;
     }
@@ -43,6 +43,7 @@ const ReportDetailScreen = ({ navigation }) => {
   }
 
   const doSubmit = async (navigation) => {
+    console.log(listReportUpload);
     if(validationSubmit() == false) return;
     
     // console.log({ ...currentReportZone, listReportUpload });
@@ -51,6 +52,7 @@ const ReportDetailScreen = ({ navigation }) => {
       const filterUpload = listReportUpload.filter(v => v.category.toLowerCase() == check.category.toLowerCase());
       if(check.checkmark == false) willUpload = [ ...willUpload, ...filterUpload];
     });
+    // console.log(currentReportZone);
     addReportItem({ ...currentReportZone, listReportUpload: willUpload });
     navigation.navigate('Home');
   };

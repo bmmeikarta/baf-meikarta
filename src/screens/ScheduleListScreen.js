@@ -136,7 +136,8 @@ export const getStatusFloor = (blocks, floor, tower) => {
                                                 && moment(v.created_at).format('YYYY-MM-DD HH:mm:ss') <= endDateTime
                                             )
                                     );
-    
+
+    if((floor == 'Top' || floor == 'Bottom') && checkZoneReport.length > 0) return 'done';
     if(checkZoneReport.length > 0 && checkZoneReport.length < 4 && canAccess) return 'on progress';
     if(checkZoneReport.length >= 4) return 'done';
     if(canAccess) return 'active';
