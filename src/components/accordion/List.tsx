@@ -73,7 +73,7 @@ const List = ({ navigation, list, category, onPressCheckList }) => {
             >
               <Animated.View style={{marginRight: 30}}>
                 {(() => {
-                  if((profileID == 28 || profileID == 37) && list.sku_code == '4'){
+                  if((profileID == 28 || profileID == 37) && (list.sku_code == '4' || list.sku_code == '21')){
                     return <></>;
                   }
                   return <Checkmark {...{ checkmarkProgress }} size={20} activeColor={null}/>;
@@ -95,7 +95,7 @@ const List = ({ navigation, list, category, onPressCheckList }) => {
             >
               <Animated.View>
                 {(() => {
-                  if((profileID == 28 || profileID == 37) && list.sku_code == '4'){
+                  if((profileID == 28 || profileID == 37) && (list.sku_code == '4' || list.sku_code == '21')){
                     return <Checkmark {...{ checkmarkProgress: progress }} size={20} activeColor={null}/>
                   }
                   return <Chevron {...{ progress }} />

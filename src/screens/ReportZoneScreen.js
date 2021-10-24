@@ -12,6 +12,7 @@ const ReportZoneScreen = ({ navigation }) => {
     const { block_name, blocks, tower, floor, parentScreen } = navigation.state.params;
     const { currentReportZone, listLog, listComplaint } =  state;
     const { userDetail } = authState;
+    const userData = ((userDetail || {}).data || {});
 
     const startDateTime = moment(((userDetail || {}).data || {}).start_datetime).format('YYYY-MM-DD HH:mm:ss');
     const endDateTime = moment(((userDetail || {}).data || {}).end_datetime).format('YYYY-MM-DD HH:mm:ss');
@@ -42,6 +43,7 @@ const ReportZoneScreen = ({ navigation }) => {
                                         )
                                     );
 
+            if(userData.profile_id == 37 && zone != 4) return "grey";
             if(zone==4) return isDone ? "grey" : "green";
             if(zone==3) return isDone ? "grey" : "blue";
             if(zone==2) return isDone ? "grey" : "#ffcea1";

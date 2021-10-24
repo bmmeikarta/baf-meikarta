@@ -215,7 +215,7 @@ const HomeScreen = ({ navigation }) => {
                     onPress={()=> !loading ? navigation.navigate('ScheduleList') : null} 
                 />
                 <View style={styles.row}>
-                    {(profileID == 28 || profileID == 37)  &&
+                    {(profileID == 28)  &&
                         <View style={styles.container}>
                             <Button 
                                 buttonStyle={[styles.buttonChild, { backgroundColor: '#eb8015' }]}
@@ -233,7 +233,7 @@ const HomeScreen = ({ navigation }) => {
                             />
                         </View>
                     }
-                    {(profileID != 28 && profileID != 36 && profileID != 37) &&
+                    {(profileID != 28 && profileID != 36) &&
                         <View style={styles.container}>
                             <Button 
                                 buttonStyle={[styles.buttonChild, { backgroundColor: '#eb8015' }]}
