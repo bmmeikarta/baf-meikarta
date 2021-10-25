@@ -34,8 +34,7 @@ const HomeScreen = ({ navigation }) => {
 
     const { fetchUnits, fetchRecords, doPostCatatMeter, state: CM_state } = useContext(CatatMeterContext);
     const { listCatatMeter } = CM_state;
-    console.log(listCatatMeter);
-    
+
     const { loading, lastUpdateDB, listAsset, testVal, listReportItem, listReportResolve, listComplaint } = state;
     const { userDetail } = authState;
 
@@ -114,7 +113,6 @@ const HomeScreen = ({ navigation }) => {
             if (state.isConnected) {
                 await doPostReport();
                 await doPostResolve();
-                await doPostCatatMeter();
 
                 await fetchAsset();
                 await fetchLog();
@@ -129,6 +127,8 @@ const HomeScreen = ({ navigation }) => {
 
                 await fetchUnits();
                 await fetchRecords();
+
+                await doPostCatatMeter();
 
                 await localToState();
             } else {
@@ -258,13 +258,16 @@ const HomeScreen = ({ navigation }) => {
                             onPress={()=> !loading ? navigation.navigate('ReportList') : null} 
                         />
                     </View>
-                    <View style={styles.container}>
-                        <Button 
-                            buttonStyle={[styles.buttonChild, { backgroundColor: '#ffc824' }]}
-                            title="CATAT METER" 
-                            onPress={()=> !loading ? navigation.navigate('CM_MainMenu') : null} 
-                        />
-                    </View>
+                    {profileID == 21 && 
+                        <View style={styles.container}>
+                            <Button 
+                                buttonStyle={[styles.buttonChild, { backgroundColor: '#ffc824' }]}
+                                title="CATAT METER" 
+                                onPress={()=> !loading ? navigation.navigate('CM_MainMenu') : null} 
+                            />
+                        </View>
+                    }
+                    
                 </View>
             </SafeAreaView>
             
