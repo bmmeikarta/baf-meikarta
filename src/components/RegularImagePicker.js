@@ -87,11 +87,9 @@ const styles = StyleSheet.create({
     detail: {
         backgroundColor: "#ebebeb",
         flexDirection: "row",
-        paddingVertical: 8,
-        paddingHorizontal: 30,
+        padding: 5,
         borderBottomWidth: 1,
         borderColor: "#f4f4f6",
-        width: '100%'
     },
     detailCol: {
         flexDirection: "column",
@@ -99,7 +97,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     imagePicker: {
-        marginTop: 10,
         borderWidth: 1,
         borderStyle: "dashed",
         borderColor: "#b8b8b8",

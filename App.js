@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from 'react-navigation-tabs';
 import { Provider as AuthProvider } from './src/context/AuthContext'; 
 import { Provider as ScheduleProvider } from './src/context/ScheduleContext';
 import { Provider as ReportProvider } from './src/context/ReportContext';
+import { AppContextProvider } from './src/context/AppContextProvider';
 import { setNavigator } from './src/navigationRef';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -25,6 +26,10 @@ import ScannerScreenCheckIn from './src/screens/ScannerScreenCheckIn';
 import ResolveListTableScreen from './src/screens/ResolveListTableScreen';
 import ResolveFormScreen from './src/screens/ResolveFormScreen';
 import CheckInScreen from './src/screens/CheckInScreen';
+import MainMenu from './src/screens/catat_meter/MainMenu';
+import UnitList from './src/screens/catat_meter/UnitList';
+import CheckQR from './src/screens/catat_meter/CheckQR';
+import Form from './src/screens/catat_meter/Form';
 
 const styles = StyleSheet.create({
   headerTitle: {
@@ -59,6 +64,30 @@ const switchNavigator = createSwitchNavigator({
           screen: ReportListScreen,
           navigationOptions: {
             headerTitle: ()=><Text style={styles.headerTitle}>{'Check Item'}</Text>,
+          }
+        },
+        CM_MainMenu: {
+          screen: MainMenu,
+          navigationOptions: {
+            headerTitle: ()=><Text style={styles.headerTitle}>{'Catat Meter'}</Text>,
+          }
+        },
+        CM_UnitList: {
+          screen: UnitList,
+          navigationOptions: {
+            headerTitle: ()=><Text style={styles.headerTitle}>{'Meter Reading'}</Text>,
+          }
+        },
+        CM_CheckQR: {
+          screen: CheckQR,
+          navigationOptions: {
+            headerTitle: ()=><Text style={styles.headerTitle}>{'Scan QR'}</Text>,
+          }
+        },
+        CM_Form: {
+          screen: Form,
+          navigationOptions: {
+            headerTitle: ()=><Text style={styles.headerTitle}>{'Detail Unit'}</Text>,
           }
         }
       }),
@@ -191,14 +220,10 @@ const App = createAppContainer(switchNavigator);
 
 export default () => {
   return (
-    <AuthProvider>
-      <ScheduleProvider>
-        <ReportProvider>
-          <App 
-            ref={(navigator) => { setNavigator(navigator) }} 
-          />
-        </ReportProvider>
-      </ScheduleProvider>
-    </AuthProvider>
+    <AppContextProvider>
+      <App 
+        ref={(navigator) => { setNavigator(navigator) }} 
+      />
+    </AppContextProvider>
   )
 }

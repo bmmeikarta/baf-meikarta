@@ -5,6 +5,7 @@ import { NavigationEvents, SafeAreaView } from "react-navigation";
 import { Context as ScheduleContext } from "../context/ScheduleContext";
 import { Context as ReportContext } from "../context/ReportContext";
 import { Context as AuthContext } from "../context/AuthContext";
+import { Context as CatatMeterContext } from "../context/CatatMeterContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import moment from "moment";
 import { Ionicons } from "@expo/vector-icons";
@@ -30,13 +31,17 @@ const HomeScreen = ({ navigation }) => {
         doPostReport, 
         doPostResolve 
     } = useContext(ReportContext);
+
+    const { fetchUnits, fetchRecords, doPostCatatMeter, state: CM_state } = useContext(CatatMeterContext);
+    const { listCatatMeter } = CM_state;
+    console.log(listCatatMeter);
     
     const { loading, lastUpdateDB, listAsset, testVal, listReportItem, listReportResolve, listComplaint } = state;
     const { userDetail } = authState;
 
     const countReportUpload = _.sum(listReportItem.map(v => v.listReportUpload.length));
 
-    const countNotSync = listReportResolve.length + listReportItem.length;
+    const countNotSync = listReportResolve.length + listReportItem.length + listCatatMeter.length;
     // const countNotResolve = listComplaint.filter(v => v.status == 'REPORTED').length;
     const countNotResolve = listComplaint.map(c => {
         const isResolved = listReportResolve.find(z => z.idReport == c.idx);
@@ -109,6 +114,7 @@ const HomeScreen = ({ navigation }) => {
             if (state.isConnected) {
                 await doPostReport();
                 await doPostResolve();
+                await doPostCatatMeter();
 
                 await fetchAsset();
                 await fetchLog();
@@ -120,6 +126,9 @@ const HomeScreen = ({ navigation }) => {
                 await fetchSchedule();
                 await fetchSchedulePattern();
                 await getCurrentShift();
+
+                await fetchUnits();
+                await fetchRecords();
 
                 await localToState();
             } else {
@@ -134,20 +143,6 @@ const HomeScreen = ({ navigation }) => {
         { firstName: 'TEST', lastName: 'TEST' },
         { firstName: 'TEST 2', lastName: 'TEST 2' },
     ];
-
-
-    // write the file
-    saveFile = async () => {
-        const { status } = await Camera.requestPermissionsAsync();
-        
-        if (status === "granted") {
-            let fileUri = FileSystem.documentDirectory + `${moment().format('YYYYMMDDHHmm')}.txt`;
-            await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(data), { encoding: FileSystem.EncodingType.UTF8 });
-            const asset = await MediaLibrary.createAssetAsync(fileUri);
-            console.log(asset);
-            await MediaLibrary.createAlbumAsync("BAF LOG", asset, false);
-        }
-    }
 
     const profileID = ((userDetail || {}).data || {}).profile_id;
 
@@ -263,6 +258,13 @@ const HomeScreen = ({ navigation }) => {
                             onPress={()=> !loading ? navigation.navigate('ReportList') : null} 
                         />
                     </View>
+                    <View style={styles.container}>
+                        <Button 
+                            buttonStyle={[styles.buttonChild, { backgroundColor: '#ffc824' }]}
+                            title="CATAT METER" 
+                            onPress={()=> !loading ? navigation.navigate('CM_MainMenu') : null} 
+                        />
+                    </View>
                 </View>
             </SafeAreaView>
             
@@ -299,6 +301,7 @@ const styles = StyleSheet.create({
         paddingVertical: 6,
         borderRadius: 4,
         height: 80,
+        marginTop: 5
     },
     version:{
         fontSize: 11,

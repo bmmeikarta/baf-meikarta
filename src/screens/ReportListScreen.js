@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     textAlign: 'center', 
     fontWeight: 'bold', 
     fontSize: 16 
-},
+  },
   timer: { alignSelf: 'center', backgroundColor: '#2fc2b8', paddingVertical: 5, paddingHorizontal: 10, borderRadius: 5 },
   filterTower: {
       backgroundColor: 'white',
