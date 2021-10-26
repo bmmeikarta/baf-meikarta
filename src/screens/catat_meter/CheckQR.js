@@ -28,11 +28,12 @@ const CheckQR = ({ navigation }) => {
   // What happens when we scan the bar code
   const handleBarCodeScanned = async ({ data }) => {
     setScanned(true);
-    const splitQR = data.split('-');
-    const unitCode = `${splitQR[0]}-${splitQR[1]}-${splitQR[2]}-${splitQR[3]}`; 
-    const findUnit = catatMeterUnits.filter(v => v.unit_code == unitCode && v.floor == floor);
+    // const splitQR = data.split('-');
+    // const unitCode = `${splitQR[0]}-${splitQR[1]}-${splitQR[2]}-${splitQR[3]}`; 
+    const field = type == 'Electric' ? 'electric_id':'water_id';
+    const findUnit = catatMeterUnits.filter(v => v[field] == data && v.floor == floor);
     if(!findUnit || findUnit.length == 0) return Alert.alert('Info', `QR Code not match for Block ${block} - Floor ${floor}`);
-    const history = listData.filter(v => v.unit_code == data);
+    const history = listData.filter(v => v.unit_code == findUnit[0].unit_code);
 
     navigation.navigate('CM_Form', { detailUnit: findUnit, history, type });
   };
