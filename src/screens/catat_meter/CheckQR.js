@@ -5,7 +5,7 @@ import { BarCodeScanner } from 'expo-barcode-scanner';
 import { Context as CatatMeterContext } from "../../context/CatatMeterContext";
 
 const CheckQR = ({ navigation }) => {
-    const { type, block, floor } = navigation.state.params;
+    const { type, block, floor, is_qc } = navigation.state.params;
     const { state } = useContext(CatatMeterContext);
     const { catatMeterUnits, listElectric, listWater } = state;
     const listData = type == 'Electric' ? listElectric : listWater
@@ -35,7 +35,7 @@ const CheckQR = ({ navigation }) => {
     if(!findUnit || findUnit.length == 0) return Alert.alert('Info', `QR Code not match for Block ${block} - Floor ${floor}`);
     const history = listData.filter(v => v.unit_code == findUnit[0].unit_code);
 
-    navigation.navigate('CM_Form', { detailUnit: findUnit, history, type });
+    navigation.navigate('CM_Form', { detailUnit: findUnit, history, type, is_qc: is_qc });
   };
 
   // Check permissions and return the screens

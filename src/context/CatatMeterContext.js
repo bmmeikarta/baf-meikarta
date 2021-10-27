@@ -15,6 +15,8 @@ const catatMeterReducer = (state, action) => {
             return { ...state, listCatatMeter: action.payload, loading: false };
         case 'UNITS_FETCH':
           return { ...state, catatMeterUnits: action.payload, loading: false };
+        case 'PROBLEMS_FETCH':
+        return { ...state, catatMeterProblems: action.payload, loading: false };
         case 'RECORDS_FETCH':
           return { ...state, ...action.payload, loading: false };
         default:
@@ -53,6 +55,22 @@ const fetchUnits = dispatch => async () => {
 
         await AsyncStorage.setItem('CM_UNITS', JSON.stringify(data.list_mkrt_unit));
         dispatch({ type: 'UNITS_FETCH', payload: data.list_mkrt_unit });
+    } catch (error) {
+        processError(error);
+        Alert.alert('Error', `No signal, failed to fetch units`);
+    }
+};
+
+const fetchProblems = dispatch => async () => {
+    try {
+        dispatch({ type: 'SET_LOADING', payload: true });
+
+        const response = await axios.get('https://easymovein.id/apieasymovein/reading_qr/get_master_problem_baf.php');
+
+        const data = response.data || {};
+
+        await AsyncStorage.setItem('CM_PROBLEMS', JSON.stringify(data.data_problem));
+        dispatch({ type: 'PROBLEMS_FETCH', payload: data.data_problem });
     } catch (error) {
         processError(error);
         Alert.alert('Error', `No signal, failed to fetch units`);
@@ -113,6 +131,7 @@ const doPostCatatMeter = dispatch => async (val) => {
         // if(res.data.error > 0) return Alert.alert('Error', error.join('\n\n'));
 
         await AsyncStorage.removeItem('localCM');
+        dispatch({ type: 'SET_LIST_CM', payload: []});
     } catch (error) {
         console.log(error);
         processError(error);
@@ -122,8 +141,8 @@ const doPostCatatMeter = dispatch => async (val) => {
 
 export const { Provider, Context} = createDataContext(
     catatMeterReducer,
-    { doPostCatatMeter, fetchUnits, fetchRecords, addCatatMeter },
+    { doPostCatatMeter, fetchUnits, fetchRecords, fetchProblems, addCatatMeter },
 
     // default state reduce
-    { loading: false, catatMeterUnits: [], listElectric: [], listWater: [], listCatatMeter: [] }
+    { loading: false, catatMeterUnits: [], catatMeterProblems: [], listElectric: [], listWater: [], listCatatMeter: [] }
 )

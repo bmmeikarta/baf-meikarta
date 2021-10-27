@@ -6,7 +6,7 @@ import { Button } from "react-native-elements";
 import { Context as CatatMeterContext } from "../../context/CatatMeterContext";
 
 const UnitList = ({ navigation }) => {
-  const { headerTitle, type } = navigation.state.params;
+  const { headerTitle, type, is_qc } = navigation.state.params;
   const { state } = useContext(CatatMeterContext);
   const { catatMeterUnits, loading } = state;
 
@@ -68,7 +68,7 @@ const UnitList = ({ navigation }) => {
           return <View key={key} style={styles.container}>
             <Button 
               buttonStyle={{ backgroundColor: `${bgFloor}` }}
-              onPress={() => navigation.navigate('CM_CheckQR', { type, block: activeBlock, floor: v })}
+              onPress={() => navigation.navigate('CM_CheckQR', { type, block: activeBlock, floor: v, is_qc: is_qc })}
               title={v}
             />
           </View>

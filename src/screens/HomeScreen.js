@@ -32,11 +32,13 @@ const HomeScreen = ({ navigation }) => {
         doPostResolve 
     } = useContext(ReportContext);
 
-    const { fetchUnits, fetchRecords, doPostCatatMeter, state: CM_state } = useContext(CatatMeterContext);
-    const { listCatatMeter } = CM_state;
+    const { fetchUnits, fetchRecords, fetchProblems, doPostCatatMeter, state: CM_state } = useContext(CatatMeterContext);
+    const { loading: catatMeterLoading, listCatatMeter } = CM_state;
 
-    const { loading, lastUpdateDB, listAsset, testVal, listReportItem, listReportResolve, listComplaint } = state;
+    const { loading: scheduleLoading, lastUpdateDB, listAsset, testVal, listReportItem, listReportResolve, listComplaint } = state;
     const { userDetail } = authState;
+
+    const loading = (scheduleLoading || catatMeterLoading);
 
     const countReportUpload = _.sum(listReportItem.map(v => v.listReportUpload.length));
 
@@ -113,6 +115,7 @@ const HomeScreen = ({ navigation }) => {
             if (state.isConnected) {
                 await doPostReport();
                 await doPostResolve();
+                await doPostCatatMeter();
 
                 await fetchAsset();
                 await fetchLog();
@@ -124,11 +127,12 @@ const HomeScreen = ({ navigation }) => {
                 await fetchSchedule();
                 await fetchSchedulePattern();
                 await getCurrentShift();
-
-                await fetchUnits();
-                await fetchRecords();
-
-                await doPostCatatMeter();
+                
+                if(profileID == 21){
+                    await fetchProblems();
+                    await fetchUnits();
+                    await fetchRecords();
+                }
 
                 await localToState();
             } else {

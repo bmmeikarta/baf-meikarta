@@ -19,6 +19,24 @@ const MainMenu = ({ navigation }) => {
                         <Button 
                             buttonStyle={[styles.buttonChild, { backgroundColor: '#fff' }]}
                             titleStyle={{ color: 'black', fontWeight: 'bold', width: '70%' }}
+                            title="QC AIR" 
+                            color
+                            onPress={()=> navigation.navigate('CM_UnitList', { headerTitle: 'QC AIR', is_qc: true, type: 'Water' })} 
+                        />
+                    </View>
+                    <View style={styles.container}>
+                        <Button 
+                            buttonStyle={[styles.buttonChild, { backgroundColor: '#fff' }]}
+                            titleStyle={{ color: 'black', fontWeight: 'bold', width: '70%' }}
+                            title="QC LISTRIK" 
+                            color
+                            onPress={()=> navigation.navigate('CM_UnitList', { headerTitle: 'QC LISTRIK', is_qc: true, type: 'Water' })} 
+                        />
+                    </View>
+                    <View style={styles.container}>
+                        <Button 
+                            buttonStyle={[styles.buttonChild, { backgroundColor: '#fff' }]}
+                            titleStyle={{ color: 'black', fontWeight: 'bold', width: '70%' }}
                             title="METER AIR READING" 
                             color
                             onPress={()=> navigation.navigate('CM_UnitList', { headerTitle: 'METER AIR READING', type: 'Water' })} 

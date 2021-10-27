@@ -1,6 +1,6 @@
 import _ from "lodash";
 import React, { useContext, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View, TextInput, Button, Alert } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, TextInput, Button, Alert, CheckBox } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { Context as CatatMeterContext } from "../../context/CatatMeterContext";
 import { Context as AuthContext } from "../../context/AuthContext";
@@ -9,22 +9,30 @@ import RegularImagePicker from "../../components/RegularImagePicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Form = ({ navigation }) => {
-  const { detailUnit, history, type } = navigation.state.params;
+  const { detailUnit, history, type, is_qc } = navigation.state.params;
   const { state: authState } = useContext(AuthContext);
   const { userDetail } = authState;
 
-  const { addCatatMeter } = useContext(CatatMeterContext);
+  const { state, addCatatMeter } = useContext(CatatMeterContext);
+  const { catatMeterProblems } = state;
 
   const dataUnit = (detailUnit || [])[0];
   const listHistory = _.sortBy(history, ['bulan']);
   const lastInput = listHistory[listHistory.length - 1];
 
   const [showHistory, setShowHistory] = useState(false);
+  const [showProblem, setShowProblem] = useState(false);
   const [form, setForm] = useState({
+    unit_code: detailUnit.unit_code,
+    bulan: moment().format('MM'),
+    tahun: moment().format('YYYY'),
+    qc_check: 1,
+    qc_id: userDetail.data.id_user,
     meteran: null,
     pemakaian: null,
     foto: null
   });
+  const [problems, setProblems] = useState([]);
 
   const onTakingImage = (data) => {
     handleChange('foto', data.photo);
@@ -38,7 +46,18 @@ const Form = ({ navigation }) => {
     });
   }
 
+  const handleChangeProblem = (idx_problem) => {
+    const isExists = problems.find(v => v == idx_problem) !== undefined;
+    if(isExists){
+      const removed = problems.filter(p => p != idx_problem);
+      setProblems(removed);
+    }else{
+      setProblems([...problems, idx_problem]);
+    }
+  }
+
   const validation = () => {
+    if(is_qc) return true;
     for (const [key, value] of Object.entries(form)) {
       if(!value) return false;
     }
@@ -47,7 +66,7 @@ const Form = ({ navigation }) => {
   }
   const doSubmit = async () => {
     if(!validation()) return Alert.alert('Warning', 'Please complete the form');
-    addCatatMeter(form);
+    addCatatMeter({ ...form, problems: problems });
     navigation.navigate('CM_UnitList');
   }
 
@@ -112,38 +131,77 @@ const Form = ({ navigation }) => {
               </View>
           })
         }
-        <View style={styles.box}>
-          <Text style={{ color: 'red', fontStyle: 'italic' }}>Silahkan Input data untuk periode {moment().format('MMM YYYY')}</Text>
+        <View style={[styles.box]}>
           <View style={styles.row}>
-            <Text style={[styles.textMD, { width: "30%" }]}>Tanggal Input</Text>
-            <Text style={styles.textMD}>: {moment().format('DD-MM-YYYY')}</Text>
+            <Text style={[styles.textLG, { width: "90%", color: 'red', fontWeight: 'bold' }]}>Problem</Text>
+            <TouchableOpacity onPress={() => setShowProblem(!showProblem)}>
+              <Ionicons name={showProblem ? 'ios-checkbox' : 'ios-checkbox-outline'} size={20} style={{color: 'red'}}></Ionicons>
+            </TouchableOpacity>
+            
           </View>
-          <View style={styles.row}>
-            <Text style={[styles.textMD, { width: "30%" }]}>Petugas</Text>
-            <Text style={styles.textMD}>: {userDetail.data.full_name}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={[styles.textMD, { width: "30%" }]}>Meteran</Text>
-            <Text style={styles.textMD}>:</Text>
-            <TextInput style={styles.input} onChangeText={(text) => handleChange('meteran', text)}></TextInput>
-          </View>
-          <View style={styles.row}>
-            <Text style={[styles.textMD, { width: "30%" }]}>Pemakaian</Text>
-            <Text style={styles.textMD}>: {form.pemakaian}</Text>
-          </View>
-          <View style={[styles.row, { marginTop: 10 }]}>
-            <Text style={[styles.textMD, { width: "30%" }]}>Gambar</Text>
-            <Text style={styles.textMD}>: </Text>
-            <RegularImagePicker onTakingImage={onTakingImage} size={150}></RegularImagePicker>
-          </View>
-
         </View>
-        <View style={{ marginVertical: 20 }}>
-          <Button 
-            buttonStyle={styles.button}
-            title="Submit"
-            onPress={() => doSubmit()}
-          />
+        
+          {showProblem && <View style={styles.box}>
+            {
+              catatMeterProblems.map((v, k) => {
+                const checked = problems.find(p => p == v.idx) !== undefined;
+                return <View style={{ flexDirection: 'row' }} key={k}>
+                  <CheckBox 
+                    value={checked}
+                    onValueChange={() => handleChangeProblem(v.idx)}
+                  />
+                  <Text style={{ alignSelf: 'center' }}>{v.problem}</Text>
+                </View>
+              })
+            }
+            </View>
+          }
+        
+
+        { !is_qc && 
+          <View style={styles.box}>
+            <Text style={{ color: 'red', fontStyle: 'italic' }}>Silahkan Input data untuk periode {moment().format('MMM YYYY')}</Text>
+            <View style={styles.row}>
+              <Text style={[styles.textMD, { width: "30%" }]}>Tanggal Input</Text>
+              <Text style={styles.textMD}>: {moment().format('DD-MM-YYYY')}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={[styles.textMD, { width: "30%" }]}>Petugas</Text>
+              <Text style={styles.textMD}>: {userDetail.data.full_name}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={[styles.textMD, { width: "30%" }]}>Meteran</Text>
+              <Text style={styles.textMD}>:</Text>
+              <TextInput style={styles.input} onChangeText={(text) => handleChange('meteran', text)}></TextInput>
+            </View>
+            <View style={styles.row}>
+              <Text style={[styles.textMD, { width: "30%" }]}>Pemakaian</Text>
+              <Text style={styles.textMD}>: {form.pemakaian}</Text>
+            </View>
+            <View style={[styles.row, { marginTop: 10 }]}>
+              <Text style={[styles.textMD, { width: "30%" }]}>Gambar</Text>
+              <Text style={styles.textMD}>: </Text>
+              <RegularImagePicker onTakingImage={onTakingImage} size={150}></RegularImagePicker>
+            </View>
+
+          </View>
+        }
+        <View style={[styles.row, { marginVertical: 20 }]}>
+          <View style={[styles.container]}>
+            <Button 
+              buttonStyle={styles.button}
+              title="Submit"
+              onPress={() => doSubmit()}
+            />
+          </View>
+          {/* <View style={[styles.container]}>
+            <Button 
+              buttonStyle={styles.button}
+              title="Problem"
+              color="#e83535"
+              onPress={() => setShowProblem(!showProblem)}
+            />
+          </View> */}
         </View>
       </ScrollView>
     </>
@@ -152,8 +210,8 @@ const Form = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: '33%',
-    padding: 2
+    width: '100%',
+    padding: 2,
   },
   input: {
     borderBottomWidth: 2,
@@ -179,6 +237,9 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 50,
     alignSelf: "center",
+  },
+  bgRed: {
+    backgroundColor: "red"
   },
   textTimer: {
     marginBottom: 10,
